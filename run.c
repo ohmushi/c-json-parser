@@ -8,6 +8,5 @@
 
 
 int main() {
-    hello();
     return EXIT_SUCCESS;
 }

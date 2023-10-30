@@ -5,12 +5,19 @@
 #include "library.h"
 #include "minunit.h"
 
+static char* test_parse_null();
+
+static char* test_get_first_key_at();
+
 static char* test_parse_simple_json();
+
 static char *test_nested_json();
 
 int tests_run = 0;
 
 static char * all_tests() {
+    mu_run_test(test_parse_null);
+    mu_run_test(test_get_first_key_at);
     mu_run_test(test_parse_simple_json);
     mu_run_test(test_nested_json);
     return EXIT_SUCCESS;
@@ -29,6 +36,25 @@ int main(int argc, char **argv) {
     return result != EXIT_SUCCESS;
 }
 
+static char* test_parse_null() {
+    Json *json_obj = parse_json(NULL);
+    mu_assert("error, the json_obj should be null", json_obj == NULL);
+    clean_json(json_obj);
+    return EXIT_SUCCESS;
+}
+
+static char* test_get_first_key_at() {
+    const char* str = " \"a key\" : \"then a value\"";
+    char *key = get_first_key_in_string(str);
+    mu_assert_not_null("test_get_first_key_at", key);
+    mu_assert_strings_equals("test_get_first_key_at", key, "a key");
+    free(key);
+
+    mu_assert_null("test_get_first_key_at", get_first_key_in_string("\"\""));
+
+    return EXIT_SUCCESS;
+}
+
 static char* test_parse_simple_json() {
     const char *json_str = "{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}";
     Json *json_obj = parse_json(json_str);
@@ -43,6 +69,7 @@ static char* test_parse_simple_json() {
     mu_assert("error, key[2] != city", strcmp(json_obj->keys[2], "city") == 0);
     mu_assert("error, value[2] != Paris", strcmp(json_obj->values[2].string, "Paris") == 0);
 
+    clean_json(json_obj);
     return EXIT_SUCCESS;
 }
 
@@ -90,5 +117,6 @@ static char *test_nested_json() {
     mu_assert("error, value[4].keys[1] != zipcode", strcmp(json_obj->values[4].keys[1], "zipcode") == 0);
     mu_assert("error, value[4].values[1] != 12345", strcmp(json_obj->values[4].values[1].string, "12345") == 0);
 
+    clean_json(json_obj);
     return EXIT_SUCCESS;
 }

@@ -36,5 +36,9 @@ struct Json {
  */
 Json *parse_json(const char *json_string);
 
+void clean_json(Json *json);
+
+char *get_first_key_in_string(const char *string);
+
 
 #endif //C_JSON_PARSER_LIBRARY_H
