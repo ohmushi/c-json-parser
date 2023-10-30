@@ -19,6 +19,7 @@ Json *parse_json(const char *json_string) {
     char* key = get_first_key_in_string(json_string + 1);
     if(json_ptr->keys == NULL) json_ptr->keys = malloc(sizeof(char*) * 1);
     else json_ptr->keys = realloc(json_ptr->keys, sizeof(char*) * json_ptr->nb_elements);
+    json_ptr->keys[json_ptr->nb_elements-1] = key;
     return json_ptr;
 }
 

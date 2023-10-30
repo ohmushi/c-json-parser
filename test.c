@@ -9,6 +9,8 @@ static char* test_parse_null();
 
 static char* test_get_first_key_at();
 
+static char* test_get_first_key();
+
 static char* test_parse_simple_json();
 
 static char *test_nested_json();
@@ -18,6 +20,7 @@ int tests_run = 0;
 static char * all_tests() {
     mu_run_test(test_parse_null);
     mu_run_test(test_get_first_key_at);
+    mu_run_test(test_get_first_key);
     mu_run_test(test_parse_simple_json);
     mu_run_test(test_nested_json);
     return EXIT_SUCCESS;
@@ -52,6 +55,17 @@ static char* test_get_first_key_at() {
 
     mu_assert_null("test_get_first_key_at", get_first_key_in_string("\"\""));
 
+    return EXIT_SUCCESS;
+}
+
+static char* test_get_first_key() {
+    const char *json_str = "{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}";
+    Json *json_obj = parse_json(json_str);
+
+    mu_assert_not_null("test_get_first_key", json_obj);
+    mu_assert_strings_equals("test_get_first_key", json_obj->keys[0], "name");
+
+    clean_json(json_obj);
     return EXIT_SUCCESS;
 }
 
