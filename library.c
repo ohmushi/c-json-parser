@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
-void hello(void) {
-    printf("Hello, World!\n");
+Json *parse_json(const char *json_string) {
+    fprintf(stdout, "%s", json_string);
+    return NULL;
 }
