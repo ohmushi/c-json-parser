@@ -8,7 +8,7 @@ typedef struct Json Json;
 struct Json {
     /**
      * a: array
-     * o: object
+     * o: node
      * s: string
      * n: number
      * b: boolean
@@ -24,7 +24,7 @@ struct Json {
     // if string
     char *string;
 
-    // if array or object
+    // if array or node
     size_t nb_elements;
     char **keys;
     Json *values;
@@ -43,7 +43,7 @@ struct Parsed {
 
     /**
      * a: array
-     * o: object
+     * o: node
      * s: string
      * p: key_value_pair
      * x: empty
@@ -51,7 +51,7 @@ struct Parsed {
     char type;
     union {
         char* string;
-        Json object;
+        Json node;
         KeyValuePair key_value_pair;
     };
 };
@@ -67,7 +67,7 @@ struct NextValueInString {
 /**
  * @brief Parses a string and returns a Json struct
  *
- * @return The parsed Json object (gives ownership)
+ * @return The parsed Json node (gives ownership)
  * @errors Returns NULL in the following cases:
  * - bad .json format
  * - cannot allocate memory
@@ -81,6 +81,8 @@ void clean_json(Json *json);
 
 Json empty_json_object();
 
+Json empty_json_array();
+
 Json json_string(char *string);
 
 Parsed get_first_string_between_double_quote(const char *string);
@@ -92,7 +94,7 @@ NextValueInString get_next_value_in_string(const char *string);
 /**
  * @errors no string is detected return 'x'
  * @param string
- * @return 'a' -> array, 'o' -> object,
+ * @return 'a' -> array, 'o' -> node,
  * 's' -> string, 'n' -> number, '\0' -> null
  */
 char get_type_of_next_value(const char *string);
@@ -102,5 +104,10 @@ bool expect_next_value(const char* string);
 bool is_white_space(const char c);
 
 void push_key_value_pair_in_json(char *key, Json value, Json *json);
+
+void push_value_in_json(Json value, Json* json);
+
+Parsed parse_json_array(const char* string);
+
 
 #endif //C_JSON_PARSER_LIBRARY_H

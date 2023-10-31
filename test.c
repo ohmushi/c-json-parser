@@ -31,6 +31,10 @@ static char *test_expect_next_value();
 
 static char * test_push_key_value_pair_in_json();
 
+static char *test_push_value_in_json();
+
+static char *test_parse_array();
+
 static char *test_nested_json();
 
 int tests_run = 0;
@@ -50,6 +54,8 @@ static char *all_tests() {
     mu_run_test(test_is_white_space);
     mu_run_test(test_expect_next_value);
     mu_run_test(test_push_key_value_pair_in_json);
+    mu_run_test(test_push_value_in_json);
+    mu_run_test(test_parse_array);
     //mu_run_test(test_nested_json);
     return EXIT_SUCCESS;
 }
@@ -123,7 +129,7 @@ static char *test_get_type_of_next_value() {
     mu_assert("test_get_type_of_next_value, string", get_type_of_next_value(": \"string\" ") == 's');
     mu_assert("test_get_type_of_next_value, number", get_type_of_next_value(" 20") == 'n');
     mu_assert("test_get_type_of_next_value, negative number", get_type_of_next_value(" -20") == 'n');
-    mu_assert("test_get_type_of_next_value, object", get_type_of_next_value("  : { \"k\" : \"v\"}") == 'o');
+    mu_assert("test_get_type_of_next_value, node", get_type_of_next_value("  : { \"k\" : \"v\"}") == 'o');
     mu_assert("test_get_type_of_next_value, array", get_type_of_next_value("  : [1,2,3], ") == 'a');
     mu_assert("test_get_type_of_next_value, null", get_type_of_next_value(" null ") == '\0');
     mu_assert("test_get_type_of_next_value, error", get_type_of_next_value(" abc ") == 'x');
@@ -227,6 +233,46 @@ static char * test_push_key_value_pair_in_json() {
     mu_assert_strings_equals("test_push_key_value_pair_in_json : second key", json.keys[1], "second key");
     mu_assert_strings_equals("test_push_key_value_pair_in_json : second string", json.values[1].string, "second string");
     return EXIT_SUCCESS;
+}
+
+static char *test_push_value_in_json() {
+    Json not_an_array = empty_json_object();
+    push_value_in_json(json_string("not an array"), &not_an_array);
+    mu_assert_ints_equals("test_push_value_in_json, not an array", not_an_array.nb_elements, 0);
+    mu_assert_null("test_push_value_in_json : not an array keys", not_an_array.keys);
+    mu_assert_null("test_push_value_in_json : not an array values", not_an_array.values);
+
+    Json array = empty_json_array();
+    push_value_in_json(json_string("first string"), &array);
+    mu_assert_ints_equals("test_push_value_in_json : first nb_elements", array.nb_elements, 1);
+    mu_assert_null("test_push_value_in_json : no keys", array.keys);
+    mu_assert_chars_equals("test_push_value_in_json : type", array.values[0].type, 's');
+    mu_assert_strings_equals("test_push_value_in_json : first string", array.values[0].string, "first string");
+
+    push_value_in_json(json_string("second string"), &array);
+    mu_assert_ints_equals("test_push_value_in_json : second nb_elements", array.nb_elements, 2);
+    mu_assert_null("test_push_value_in_json : no keys", array.keys);
+    mu_assert_chars_equals("test_push_value_in_json : type", array.values[1].type, 's');
+    mu_assert_strings_equals("test_push_value_in_json : second string", array.values[1].string, "second string");
+
+    return EXIT_SUCCESS;
+}
+
+static char *test_parse_array() {
+    Parsed array_number = parse_json_array("[1,\"2\",3]");
+    printf("%ld\n", array_number.node.nb_elements);
+    mu_assert_chars_equals("test_parse_array, type", array_number.type, 'a');
+    mu_assert_ints_equals("test_parse_array, nb_elements", array_number.node.nb_elements, 3);
+    mu_assert_ints_equals("test_parse_array, number", array_number.node.values[0].number, 1);
+    mu_assert_strings_equals("test_parse_array, number", array_number.node.values[1].string, "2");
+    mu_assert_ints_equals("test_parse_array, number", array_number.node.values[2].number, 3);
+    clean_json(&array_number.node);
+
+    return EXIT_SUCCESS;
+}
+
+static char *test_parse_array_with_nested_object() {
+
 }
 
 
