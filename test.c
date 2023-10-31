@@ -75,11 +75,13 @@ static char *test_parse_null() {
 
 static char *test_get_string_between_quotes() {
     const char *str = " \"a key\" : \"then a string\"";
-    StringParsed key = get_first_string_between_double_quote(str);
+    Parsed key = get_first_string_between_double_quote(str);
+    mu_assert("test_get_string_between_quotes", key.type == 's');
     mu_assert_not_null("test_get_string_between_quotes", key.string);
     mu_assert_strings_equals("test_get_string_between_quotes", key.string, "a key");
     free(key.string);
-    StringParsed key_two = get_first_string_between_double_quote("\"Paul\", \"age\":20, \"city\":\"Paris\"}");
+    Parsed key_two = get_first_string_between_double_quote("\"Paul\", \"age\":20, \"city\":\"Paris\"}");
+    mu_assert("test_get_string_between_quotes", key_two.type == 's');
     mu_assert_not_null("test_get_string_between_quotes", key_two.string);
     mu_assert_strings_equals("test_get_string_between_quotes, string", key_two.string, "Paul");
     free(key_two.string);

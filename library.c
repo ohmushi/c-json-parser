@@ -84,7 +84,7 @@ Json json_number(long number) {
 }
 
 
-StringParsed get_first_string_between_double_quote(const char *string) {
+Parsed get_first_string_between_double_quote(const char *string) {
     char *start = (char *) string;
     while (start != NULL && *start != '\0' && *start != '"') {
         start += 1;
@@ -94,13 +94,14 @@ StringParsed get_first_string_between_double_quote(const char *string) {
     while (end != NULL && *end != '\0' && *end != '"') {
         end += 1;
     }
-    StringParsed parsed = {.string = NULL, .start = start, .end = end};
+    Parsed parsed = {.start = start, .end = end, .type = 'x', .string = NULL};
     if (end <= start || *end == '\0') return parsed;
 
     uint16_t key_len = end - start;
     char *key = malloc(sizeof(char) * key_len + 1);
     strncpy(key, start, key_len);
     key[key_len] = '\0';
+    parsed.type = 's';
     parsed.string = key;
     return parsed;
 }
@@ -137,7 +138,7 @@ KeyValuePairParsed parse_key_value_pair(const char *string) {
             .start = NULL,
             .end = NULL,
     };
-    StringParsed key = get_first_string_between_double_quote(string);
+    Parsed key = get_first_string_between_double_quote(string);
     if (key.string == NULL) return parsed;
 
     // TODO check the ':' between key and string
@@ -171,7 +172,9 @@ NextValueInString get_next_value_in_string(const char *string) {
 }
 
 NextValueInString get_next_string_value_in_string(const char *string) {
-    StringParsed value = get_first_string_between_double_quote(string);
+    Parsed value = get_first_string_between_double_quote(string);
+    if(value.type != 's') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+
     return (NextValueInString) {
             .start = value.start,
             .end = value.end,

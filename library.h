@@ -30,11 +30,14 @@ struct Json {
     Json *values;
 };
 
-typedef struct StringParsed StringParsed;
-struct StringParsed {
-    char *string;
-    char* start;
-    char* end;
+typedef struct Parsed Parsed;
+struct Parsed {
+    char *start;
+    char *end;
+    char type;
+    union {
+        char* string;
+    };
 };
 
 
@@ -109,7 +112,7 @@ Json empty_json_object();
 
 Json json_string(char *string);
 
-StringParsed get_first_string_between_double_quote(const char *string);
+Parsed get_first_string_between_double_quote(const char *string);
 
 KeyValuePairParsed parse_key_value_pair(const char* string);
 
