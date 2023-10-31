@@ -23,23 +23,27 @@ Json *parse_json(const char *json_string) {
     Json *json_ptr = malloc(sizeof(Json));
     *json_ptr = empty_json_object();
 
-    KeyValuePairParsed key_value_pair = {.end = json_string};
-    do {
+    KeyValuePairParsed key_value_pair = parse_key_value_pair(json_string);
+    if(key_value_pair.key == NULL) return json_ptr;
+
+    json_ptr->nb_elements = 1;
+    json_ptr->keys = malloc(sizeof(char *));
+    json_ptr->keys[json_ptr->nb_elements - 1] = key_value_pair.key;
+
+    json_ptr->values = malloc(sizeof(Json));
+    json_ptr->values[json_ptr->nb_elements - 1] = key_value_pair.value;
+
+    while (expect_next_value(key_value_pair.end)) {
         key_value_pair = parse_key_value_pair(key_value_pair.end);
-        printf("\nend: [%s]", key_value_pair.end);
         json_ptr->nb_elements += 1;
-        if (json_ptr->keys == NULL) {
-            json_ptr->keys = malloc(sizeof(char *));
-            json_ptr->values = malloc(sizeof(Json));
-        } else {
-            json_ptr->keys = realloc(json_ptr->keys, sizeof(char *) * json_ptr->nb_elements);
-            json_ptr->values = realloc(json_ptr->values, sizeof(Json) * json_ptr->nb_elements);
-        }
+
+        json_ptr->keys = realloc(json_ptr->keys, sizeof(char *) * json_ptr->nb_elements);
+        json_ptr->values = realloc(json_ptr->values, sizeof(Json) * json_ptr->nb_elements);
 
         json_ptr->keys[json_ptr->nb_elements - 1] = key_value_pair.key;
         json_ptr->values[json_ptr->nb_elements - 1] = key_value_pair.value;
 
-    } while (expect_next_value(key_value_pair.end));
+    };
     printf("\n nb keys : %d", json_ptr->nb_elements);
 
     return json_ptr;
