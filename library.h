@@ -87,6 +87,10 @@ void free_json(Json *json);
 
 void clean_json(Json *json);
 
+Json empty_json_object();
+
+Json json_string(char *string);
+
 StringParsed get_first_string_between_double_quote(const char *string);
 
 KeyValuePairParsed parse_key_value_pair(const char* string);
@@ -104,5 +108,7 @@ char get_type_of_next_value(const char *string);
 bool expect_next_value(const char* string);
 
 bool is_white_space(const char c);
+
+void push_key_value_pair_in_json(char *key, Json value, Json *json);
 
 #endif //C_JSON_PARSER_LIBRARY_H

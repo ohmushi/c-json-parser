@@ -5,9 +5,7 @@
 
 Json no_json();
 
-Json empty_json_object();
 
-Json json_string(char *string);
 
 
 NextValueInString get_next_string_value_in_string(const char *string);
@@ -18,35 +16,21 @@ Json json_number(long strtol);
 
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
-    // TODO trim left
-    if (json_string[0] != '{') return NULL;
-    Json *json_ptr = malloc(sizeof(Json));
-    *json_ptr = empty_json_object();
+    char type = get_type_of_next_value(json_string);
+    if (type != 'o') return NULL;
+    Json *node = malloc(sizeof(Json));
+    *node = empty_json_object();
 
     KeyValuePairParsed key_value_pair = parse_key_value_pair(json_string);
-    if(key_value_pair.key == NULL) return json_ptr;
+    if(key_value_pair.key == NULL) return node;
 
-    json_ptr->nb_elements = 1;
-    json_ptr->keys = malloc(sizeof(char *));
-    json_ptr->keys[json_ptr->nb_elements - 1] = key_value_pair.key;
-
-    json_ptr->values = malloc(sizeof(Json));
-    json_ptr->values[json_ptr->nb_elements - 1] = key_value_pair.value;
-
+    push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, node);
     while (expect_next_value(key_value_pair.end)) {
         key_value_pair = parse_key_value_pair(key_value_pair.end);
-        json_ptr->nb_elements += 1;
+        push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, node);
+    }
 
-        json_ptr->keys = realloc(json_ptr->keys, sizeof(char *) * json_ptr->nb_elements);
-        json_ptr->values = realloc(json_ptr->values, sizeof(Json) * json_ptr->nb_elements);
-
-        json_ptr->keys[json_ptr->nb_elements - 1] = key_value_pair.key;
-        json_ptr->values[json_ptr->nb_elements - 1] = key_value_pair.value;
-
-    };
-    printf("\n nb keys : %d", json_ptr->nb_elements);
-
-    return json_ptr;
+    return node;
 }
 
 Json no_json() {
@@ -226,3 +210,16 @@ bool is_white_space(const char c) {
     }
 }
 
+void push_key_value_pair_in_json(char *key, Json value, Json *json) {
+    json->nb_elements += 1;
+    if(json->nb_elements == 1) {
+        json->keys = malloc(sizeof(char *));
+        json->values = malloc(sizeof(Json));
+    } else if(json->nb_elements > 1) {
+        json->keys = realloc(json->keys, sizeof(char *) * json->nb_elements);
+        json->values = realloc(json->values, sizeof(Json) * json->nb_elements);
+    } else return;
+
+    json->keys[json->nb_elements - 1] = key;
+    json->values[json->nb_elements - 1] = value;
+}

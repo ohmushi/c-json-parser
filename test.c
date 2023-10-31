@@ -23,6 +23,7 @@ static char *test_is_white_space();
 
 static char *test_expect_next_value();
 
+static char * test_push_key_value_pair_in_json();
 
 static char *test_nested_json();
 
@@ -38,6 +39,7 @@ static char *all_tests() {
     mu_run_test(test_parse_simple_json);
     mu_run_test(test_is_white_space);
     mu_run_test(test_expect_next_value);
+    mu_run_test(test_push_key_value_pair_in_json);
     //mu_run_test(test_nested_json);
     return EXIT_SUCCESS;
 }
@@ -168,6 +170,21 @@ static char *test_expect_next_value() {
     mu_assert_false("test_expect_next_value", expect_next_value(" ]"));
     mu_assert_false("test_expect_next_value", expect_next_value("\"next\":\"but no comma\""));
     mu_assert_false("test_expect_next_value", expect_next_value(" X  , "));
+    return EXIT_SUCCESS;
+}
+
+
+static char * test_push_key_value_pair_in_json() {
+    Json json = empty_json_object();
+    push_key_value_pair_in_json("first key", json_string("first value"), &json);
+    mu_assert_ints_equals("test_push_key_value_pair_in_json : first nb_elements", json.nb_elements, 1);
+    mu_assert_strings_equals("test_push_key_value_pair_in_json : first key", json.keys[0], "first key");
+    mu_assert_strings_equals("test_push_key_value_pair_in_json : first value", json.values[0].string, "first value");
+
+    push_key_value_pair_in_json("second key", json_string("second value"), &json);
+    mu_assert_ints_equals("test_push_key_value_pair_in_json : second nb_elements", json.nb_elements, 2);
+    mu_assert_strings_equals("test_push_key_value_pair_in_json : second key", json.keys[1], "second key");
+    mu_assert_strings_equals("test_push_key_value_pair_in_json : second value", json.values[1].string, "second value");
     return EXIT_SUCCESS;
 }
 
