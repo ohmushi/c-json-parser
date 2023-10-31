@@ -37,6 +37,8 @@ static char *test_parse_array();
 
 static char *test_parse_array_with_nested_object();
 
+static char *test_parse_object_with_nested_array();
+
 static char *test_nested_json();
 
 int tests_run = 0;
@@ -59,6 +61,7 @@ static char *all_tests() {
     mu_run_test(test_push_value_in_json);
     mu_run_test(test_parse_array);
     mu_run_test(test_parse_array_with_nested_object);
+    mu_run_test(test_parse_object_with_nested_array);
     //mu_run_test(test_nested_json);
     return EXIT_SUCCESS;
 }
@@ -285,6 +288,22 @@ static char *test_parse_array_with_nested_object() {
     mu_assert_ints_equals("test_parse_array_with_nested_object, object nb_elements", array.node.values[1].nb_elements, 1);
     mu_assert_strings_equals("test_parse_array_with_nested_object, object key", array.node.values[1].keys[0], "k");
     mu_assert_ints_equals("test_parse_array_with_nested_object, object value", array.node.values[1].values[0].number, 2);
+
+    return EXIT_SUCCESS;
+}
+
+static char *test_parse_object_with_nested_array() {
+    Parsed obj = parse_json_object("{\"array\":[1,2]}");
+
+    mu_assert_ints_equals("test_parse_object_with_nested_array, nb_elements", obj.node.nb_elements, 1);
+    mu_assert_strings_equals("test_parse_object_with_nested_array, key", obj.node.keys[0], "array");
+
+    // array
+    mu_assert_chars_equals("test_parse_array_with_nested_object, type", obj.node.values[0].type, 'a');
+    mu_assert_ints_equals("test_parse_array_with_nested_object, nb_elements", obj.node.values[0].nb_elements, 2);
+    mu_assert_ints_equals("test_parse_array_with_nested_object, array[0]", obj.node.values[0].values[0].number, 1);
+    mu_assert_ints_equals("test_parse_array_with_nested_object, array[0]", obj.node.values[0].values[1].number, 2);
+
 
     return EXIT_SUCCESS;
 }

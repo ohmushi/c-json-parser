@@ -5,7 +5,6 @@
 
 Json no_json();
 
-
 NextValueInString get_next_string_value_in_string(const char *string);
 
 NextValueInString get_next_number_value_in_string(const char *string);
@@ -14,7 +13,7 @@ Json json_number(long number);
 
 NextValueInString get_next_object_value_in_string(const char *string);
 
-Parsed parse_json_object(const char *string);
+NextValueInString get_next_array_value_in_string(const char *string);
 
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
@@ -166,9 +165,10 @@ NextValueInString get_next_value_in_string(const char *string) {
             return get_next_string_value_in_string(string);
         case 'n':
             return get_next_number_value_in_string(string);
-            // TODO array
         case 'o':
             return get_next_object_value_in_string(string);
+        case 'a':
+            return get_next_array_value_in_string(string);
             // TODO null
         default:
             return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
@@ -206,6 +206,15 @@ NextValueInString get_next_object_value_in_string(const char *string) {
 
     Parsed obj = parse_json_object(c);
     return (NextValueInString) {.start = obj.start, .json = obj.node, .end = obj.end};
+}
+
+NextValueInString get_next_array_value_in_string(const char *string) {
+    char *c = (char *) string;
+    while (*c != '\0' && *c != '[') c++;
+    if(*c != '[') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+
+    Parsed array = parse_json_array(c);
+    return (NextValueInString) {.start = array.start, .json = array.node, .end = array.end};
 }
 
 

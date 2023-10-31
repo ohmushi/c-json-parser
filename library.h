@@ -107,6 +107,8 @@ void push_key_value_pair_in_json(char *key, Json value, Json *json);
 
 void push_value_in_json(Json value, Json* json);
 
+Parsed parse_json_object(const char *string);
+
 Parsed parse_json_array(const char* string);
 
 
