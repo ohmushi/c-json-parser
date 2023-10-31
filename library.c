@@ -162,8 +162,8 @@ NextValueInString get_next_value_in_string(const char *string) {
         case 'n':
             return get_next_number_value_in_string(string);
             // TODO array
-        //case 'o':
-            //return get_next_object_value_in_string(string);
+        case 'o':
+            return get_next_object_value_in_string(string);
             // TODO null
         default:
             return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
@@ -194,14 +194,11 @@ NextValueInString get_next_number_value_in_string(const char *string) {
 
 NextValueInString get_next_object_value_in_string(const char *string) {
     char *c = (char *) string;
-    while (*c != '\0') {
-        // TODO check white space
-        if (*c == '{') break;
-        c++;
-    }
-    printf("\nstring: [%s]\n", c);
-    NextValueInString result;
-    return result;
+    while (*c != '\0' && *c != '{') c++;
+    if(*c != '{') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+
+    ObjectParsed obj = parse_json_object(c);
+    return (NextValueInString) {.start = obj.start, .json = obj.object, .end = obj.end};
 }
 
 

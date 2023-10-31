@@ -129,11 +129,11 @@ static char *test_get_next_value_in_string() {
     mu_assert_ints_equals("test_get_next_value_in_string, number", number.json.number, 20);
     clean_json(&number.json);
 
-    //NextValueInString obj = get_next_value_in_string(": {\"k\":\"v\"},");
-    //mu_assert("test_get_next_value_in_string, obj", obj.json.type == 'o');
-    //mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.keys[0], "k");
-    //mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.values[0].string, "v");
-    //clean_json(&obj.json);
+    NextValueInString obj = get_next_value_in_string(": {\"k\":\"v\"},");
+    mu_assert("test_get_next_value_in_string, obj", obj.json.type == 'o');
+    mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.keys[0], "k");
+    mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.values[0].string, "v");
+    clean_json(&obj.json);
 
     // TODO array, number, null
 
