@@ -23,8 +23,10 @@ Json *parse_json(const char *json_string) {
     Json *json_ptr = malloc(sizeof(Json));
     *json_ptr = empty_json_object();
 
-    KeyValuePairParsed key_value_pair = parse_key_value_pair(json_string);
-    while (key_value_pair.key != NULL) {
+    KeyValuePairParsed key_value_pair = {.end = json_string};
+    do {
+        key_value_pair = parse_key_value_pair(key_value_pair.end);
+        printf("\nend: [%s]", key_value_pair.end);
         json_ptr->nb_elements += 1;
         if (json_ptr->keys == NULL) {
             json_ptr->keys = malloc(sizeof(char *));
@@ -37,8 +39,8 @@ Json *parse_json(const char *json_string) {
         json_ptr->keys[json_ptr->nb_elements - 1] = key_value_pair.key;
         json_ptr->values[json_ptr->nb_elements - 1] = key_value_pair.value;
 
-        key_value_pair = parse_key_value_pair(key_value_pair.end + 1);
-    };
+    } while (expect_next_value(key_value_pair.end));
+    printf("\n nb keys : %d", json_ptr->nb_elements);
 
     return json_ptr;
 }
@@ -171,9 +173,11 @@ NextValueInString get_next_number_value_in_string(const char *string) {
         start++;
     }
 
-    NextValueInString next = {.start = NULL, .end = NULL, .json = no_json()};
-    next.json = json_number(strtol(start, &next.end, 10));
-    return next;
+    char *end;
+    Json value = json_number(strtol(start, &end, 10));
+
+    if(end == NULL || end <= start) return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+    return (NextValueInString) {.start = start, .end = end-1, .json = value};
 }
 
 char get_type_of_next_value(const char *string) {
@@ -200,7 +204,7 @@ char get_type_of_next_value(const char *string) {
 bool expect_next_value(const char *string) {
     char *c = (char *) string;
     while (*c != '\0') {
-        if(!is_white_space(*c)) return *c == ',';
+        if (!is_white_space(*c)) return *c == ',';
         c++;
     }
     return false;
