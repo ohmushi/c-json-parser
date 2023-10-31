@@ -37,6 +37,7 @@ struct Parsed {
     char type;
     union {
         char* string;
+        Json object;
     };
 };
 
@@ -66,24 +67,6 @@ struct KeyValuePairParsed{
     Json value;
     char* start;
     const char *end;
-};
-
-
-// TODO Make one struct Parsed with union, not one struct per type parsed
-/**
- * @example : ': {"k": "v"}, '
- * - start = '{"k": "v"}, '
- * - end = '}, '
- * - object
- *      - type = 's'
- *      - key[0] = 'k'
- *      - values[0].string = 'v'
- */
-typedef struct ObjectParsed ObjectParsed;
-struct ObjectParsed{
-    Json object;
-    char* start;
-    char *end;
 };
 
 typedef struct NextValueInString NextValueInString;

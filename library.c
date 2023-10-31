@@ -14,22 +14,23 @@ Json json_number(long strtol);
 
 NextValueInString get_next_object_value_in_string(const char *string);
 
-ObjectParsed parse_json_object(const char *string);
+Parsed parse_json_object(const char *string);
 
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
     char type = get_type_of_next_value(json_string);
     if (type != 'o') return NULL;
     Json *node = malloc(sizeof(Json));
-    ObjectParsed obj = parse_json_object(json_string);
+    Parsed obj = parse_json_object(json_string);
+    if(obj.type != 'o') return NULL;
     *node = obj.object;
 
     return node;
 }
 
-ObjectParsed parse_json_object(const char *string) {
+Parsed parse_json_object(const char *string) {
     Json node = empty_json_object();
-    ObjectParsed not_parsed = (ObjectParsed){.start = NULL, .object = no_json(), .end = NULL};
+    Parsed not_parsed = (Parsed){.start = NULL, .object = no_json(), .end = NULL, .type = 'x'};
     char *start = (char *)string;
     while (*start != '\0' && *start != '{') start++;
     if(*start != '{') return not_parsed;
@@ -48,7 +49,7 @@ ObjectParsed parse_json_object(const char *string) {
     while (*end != '\0' && *end != '}') end++;
     if(*end != '}') return not_parsed;
 
-    ObjectParsed parsed = {.start = start, .object = node, .end = end};
+    Parsed parsed = {.start = start, .object = node, .end = end, .type = 'o'};
     return parsed;
 }
 
@@ -200,7 +201,7 @@ NextValueInString get_next_object_value_in_string(const char *string) {
     while (*c != '\0' && *c != '{') c++;
     if(*c != '{') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
 
-    ObjectParsed obj = parse_json_object(c);
+    Parsed obj = parse_json_object(c);
     return (NextValueInString) {.start = obj.start, .json = obj.object, .end = obj.end};
 }
 
