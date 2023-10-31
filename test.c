@@ -120,14 +120,22 @@ static char *test_get_type_of_next_value() {
 
 static char *test_get_next_value_in_string() {
     NextValueInString string = get_next_value_in_string(":\"Paul\",");
+    mu_assert("test_get_next_value_in_string, string", string.json.type == 's');
     mu_assert_strings_equals("test_get_next_value_in_string, string", string.json.string, "Paul");
     clean_json(&string.json);
 
     NextValueInString number = get_next_value_in_string(": 20,");
+    mu_assert("test_get_next_value_in_string, number", number.json.type == 'n');
     mu_assert_ints_equals("test_get_next_value_in_string, number", number.json.number, 20);
     clean_json(&number.json);
 
-    // TODO obj, array, number, null
+    //NextValueInString obj = get_next_value_in_string(": {\"k\":\"v\"},");
+    //mu_assert("test_get_next_value_in_string, obj", obj.json.type == 'o');
+    //mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.keys[0], "k");
+    //mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.values[0].string, "v");
+    //clean_json(&obj.json);
+
+    // TODO array, number, null
 
     return EXIT_SUCCESS;
 }

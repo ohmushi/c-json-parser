@@ -14,7 +14,7 @@ struct Json {
      * b: boolean
      * \0: null
      *
-     * x: error
+     * x: empty
      */
     char type;
 

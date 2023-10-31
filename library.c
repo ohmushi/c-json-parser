@@ -6,30 +6,37 @@
 Json no_json();
 
 
-
-
 NextValueInString get_next_string_value_in_string(const char *string);
 
 NextValueInString get_next_number_value_in_string(const char *string);
 
 Json json_number(long strtol);
 
+NextValueInString get_next_object_value_in_string(const char *string);
+
+Json parse_json_object(const char *string);
+
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
     char type = get_type_of_next_value(json_string);
     if (type != 'o') return NULL;
     Json *node = malloc(sizeof(Json));
-    *node = empty_json_object();
+    *node = parse_json_object(json_string);
 
-    KeyValuePairParsed key_value_pair = parse_key_value_pair(json_string);
-    if(key_value_pair.key == NULL) return node;
+    return node;
+}
 
-    push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, node);
+Json parse_json_object(const char *string) {
+    Json node = empty_json_object();
+    KeyValuePairParsed key_value_pair = parse_key_value_pair(string);
+    if (key_value_pair.key == NULL) return node;
+
+    push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, &node);
     while (expect_next_value(key_value_pair.end)) {
         key_value_pair = parse_key_value_pair(key_value_pair.end);
-        push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, node);
+        if(key_value_pair.key == NULL) break;
+        push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, &node);
     }
-
     return node;
 }
 
@@ -121,7 +128,11 @@ KeyValuePairParsed parse_key_value_pair(const char *string) {
     StringParsed key = get_first_string_between_double_quote(string);
     if (key.value == NULL) return parsed;
 
+    // TODO check the ':' between key and value
+
     NextValueInString value = get_next_value_in_string(key.end + 2);
+    if (value.json.type == 'x')
+        return (KeyValuePairParsed) {.start = NULL, .key = NULL, .value = no_json(), .end = NULL};
     parsed.key = key.value;
     parsed.start = key.start - 1;
     parsed.end = value.end + 1;
@@ -139,7 +150,8 @@ NextValueInString get_next_value_in_string(const char *string) {
         case 'n':
             return get_next_number_value_in_string(string);
             // TODO array
-            // TODO obj
+            //case 'o':
+            //return get_next_object_value_in_string(string);
             // TODO null
         default:
             return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
@@ -164,9 +176,22 @@ NextValueInString get_next_number_value_in_string(const char *string) {
     char *end;
     Json value = json_number(strtol(start, &end, 10));
 
-    if(end == NULL || end <= start) return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
-    return (NextValueInString) {.start = start, .end = end-1, .json = value};
+    if (end == NULL || end <= start) return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+    return (NextValueInString) {.start = start, .end = end - 1, .json = value};
 }
+
+NextValueInString get_next_object_value_in_string(const char *string) {
+    char *c = (char *) string;
+    while (*c != '\0') {
+        // TODO check white space
+        if (*c == '{') break;
+        c++;
+    }
+    printf("\nstring: [%s]\n", c);
+    NextValueInString result;
+    return result;
+}
+
 
 char get_type_of_next_value(const char *string) {
     char *i = (char *) string;
@@ -212,10 +237,10 @@ bool is_white_space(const char c) {
 
 void push_key_value_pair_in_json(char *key, Json value, Json *json) {
     json->nb_elements += 1;
-    if(json->nb_elements == 1) {
+    if (json->nb_elements == 1) {
         json->keys = malloc(sizeof(char *));
         json->values = malloc(sizeof(Json));
-    } else if(json->nb_elements > 1) {
+    } else if (json->nb_elements > 1) {
         json->keys = realloc(json->keys, sizeof(char *) * json->nb_elements);
         json->values = realloc(json->values, sizeof(Json) * json->nb_elements);
     } else return;
