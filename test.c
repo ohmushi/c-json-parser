@@ -53,7 +53,6 @@ static char *all_tests() {
     mu_run_test(test_get_next_number_value_in_string);
     mu_run_test(test_get_next_object_value_in_string);
     mu_run_test(test_parse_simple_json);
-    //mu_run_test(test_get_next_array_value_in_string);
     // TODO test_get_next array, null, bool
     mu_run_test(test_is_white_space);
     mu_run_test(test_expect_next_value);
@@ -62,7 +61,7 @@ static char *all_tests() {
     mu_run_test(test_parse_array);
     mu_run_test(test_parse_array_with_nested_object);
     mu_run_test(test_parse_object_with_nested_array);
-    //mu_run_test(test_nested_json);
+    mu_run_test(test_nested_json);
     return EXIT_SUCCESS;
 }
 
