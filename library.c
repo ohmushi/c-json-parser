@@ -25,7 +25,6 @@ Json *parse_json(const char *json_string) {
 
     KeyValuePairParsed key_value_pair = parse_key_value_pair(json_string);
     while (key_value_pair.key != NULL) {
-        printf("\nend : [%s]", key_value_pair.end);
         json_ptr->nb_elements += 1;
         if (json_ptr->keys == NULL) {
             json_ptr->keys = malloc(sizeof(char *));
@@ -145,12 +144,15 @@ NextValueInString get_next_value_in_string(const char *string) {
     // TODO obj, array, number, null
     char type = get_type_of_next_value(string);
     switch (type) {
-        case 's': return get_next_string_value_in_string(string);
-        case 'n': return get_next_number_value_in_string(string);
-        // TODO array
-        // TODO obj
-        // TODO null
-        default: return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
+        case 's':
+            return get_next_string_value_in_string(string);
+        case 'n':
+            return get_next_number_value_in_string(string);
+            // TODO array
+            // TODO obj
+            // TODO null
+        default:
+            return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
     }
 }
 
@@ -164,7 +166,7 @@ NextValueInString get_next_string_value_in_string(const char *string) {
 }
 
 NextValueInString get_next_number_value_in_string(const char *string) {
-    char *start = (char*) string;
+    char *start = (char *) string;
     while (*start != '\0' && *start != '-' && (*start < '0' || *start > '9')) {
         start++;
     }
@@ -193,5 +195,26 @@ char get_type_of_next_value(const char *string) {
         i++;
     }
     return 'x';
+}
+
+bool expect_next_value(const char *string) {
+    char *c = (char *) string;
+    while (*c != '\0') {
+        if(!is_white_space(*c)) return *c == ',';
+        c++;
+    }
+    return false;
+}
+
+bool is_white_space(const char c) {
+    switch (c) {
+        case ' ':
+        case '\n':
+        case '\t':
+        case '\r':
+            return true;
+        default:
+            return false;
+    }
 }
 

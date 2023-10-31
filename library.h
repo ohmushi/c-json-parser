@@ -2,6 +2,7 @@
 #define C_JSON_PARSER_LIBRARY_H
 
 #include "stdlib.h"
+#include "stdbool.h"
 
 typedef struct Json Json;
 struct Json {
@@ -17,7 +18,7 @@ struct Json {
      */
     char type;
 
-    // if number
+    // if number, 0 or 1 if boolean
     long number;
 
     // if value
@@ -99,5 +100,9 @@ NextValueInString get_next_value_in_string(const char *string);
  * 's' -> string, 'n' -> number, '\0' -> null
  */
 char get_type_of_next_value(const char *string);
+
+bool expect_next_value(const char* string);
+
+bool is_white_space(const char c);
 
 #endif //C_JSON_PARSER_LIBRARY_H
