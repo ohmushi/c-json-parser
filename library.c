@@ -14,22 +14,28 @@ Json json_number(long strtol);
 
 NextValueInString get_next_object_value_in_string(const char *string);
 
-Json parse_json_object(const char *string);
+ObjectParsed parse_json_object(const char *string);
 
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
     char type = get_type_of_next_value(json_string);
     if (type != 'o') return NULL;
     Json *node = malloc(sizeof(Json));
-    *node = parse_json_object(json_string);
+    ObjectParsed obj = parse_json_object(json_string);
+    *node = obj.object;
 
     return node;
 }
 
-Json parse_json_object(const char *string) {
+ObjectParsed parse_json_object(const char *string) {
     Json node = empty_json_object();
+    ObjectParsed not_parsed = (ObjectParsed){.start = NULL, .object = no_json(), .end = NULL};
+    char *start = (char *)string;
+    while (*start != '\0' && *start != '{') start++;
+    if(*start != '{') return not_parsed;
+
     KeyValuePairParsed key_value_pair = parse_key_value_pair(string);
-    if (key_value_pair.key == NULL) return node;
+    if (key_value_pair.key == NULL) return not_parsed;
 
     push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, &node);
     while (expect_next_value(key_value_pair.end)) {
@@ -37,7 +43,13 @@ Json parse_json_object(const char *string) {
         if(key_value_pair.key == NULL) break;
         push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, &node);
     }
-    return node;
+
+    char *end = (char *)key_value_pair.end;
+    while (*end != '\0' && *end != '}') end++;
+    if(*end != '}') return not_parsed;
+
+    ObjectParsed parsed = {.start = start, .object = node, .end = end};
+    return parsed;
 }
 
 Json no_json() {
@@ -82,14 +94,14 @@ StringParsed get_first_string_between_double_quote(const char *string) {
     while (end != NULL && *end != '\0' && *end != '"') {
         end += 1;
     }
-    StringParsed parsed = {.value = NULL, .start = start, .end = end};
+    StringParsed parsed = {.string = NULL, .start = start, .end = end};
     if (end <= start || *end == '\0') return parsed;
 
     uint16_t key_len = end - start;
     char *key = malloc(sizeof(char) * key_len + 1);
     strncpy(key, start, key_len);
     key[key_len] = '\0';
-    parsed.value = key;
+    parsed.string = key;
     return parsed;
 }
 
@@ -126,14 +138,14 @@ KeyValuePairParsed parse_key_value_pair(const char *string) {
             .end = NULL,
     };
     StringParsed key = get_first_string_between_double_quote(string);
-    if (key.value == NULL) return parsed;
+    if (key.string == NULL) return parsed;
 
-    // TODO check the ':' between key and value
+    // TODO check the ':' between key and string
 
     NextValueInString value = get_next_value_in_string(key.end + 2);
     if (value.json.type == 'x')
         return (KeyValuePairParsed) {.start = NULL, .key = NULL, .value = no_json(), .end = NULL};
-    parsed.key = key.value;
+    parsed.key = key.string;
     parsed.start = key.start - 1;
     parsed.end = value.end + 1;
     parsed.value = value.json;
@@ -150,7 +162,7 @@ NextValueInString get_next_value_in_string(const char *string) {
         case 'n':
             return get_next_number_value_in_string(string);
             // TODO array
-            //case 'o':
+        //case 'o':
             //return get_next_object_value_in_string(string);
             // TODO null
         default:
@@ -163,7 +175,7 @@ NextValueInString get_next_string_value_in_string(const char *string) {
     return (NextValueInString) {
             .start = value.start,
             .end = value.end,
-            .json = json_string(value.value),
+            .json = json_string(value.string),
     };
 }
 

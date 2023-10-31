@@ -21,7 +21,7 @@ struct Json {
     // if number, 0 or 1 if boolean
     long number;
 
-    // if value
+    // if string
     char *string;
 
     // if array or object
@@ -32,26 +32,26 @@ struct Json {
 
 typedef struct StringParsed StringParsed;
 struct StringParsed {
-    char *value;
+    char *string;
     char* start;
     char* end;
 };
 
 
 /**
- * @example : { "a key" : "a value" }
+ * @example : { "a key" : "a string" }
  * - key = 'a key'
- * - value->string = 'a value'
- * - start = a key" : "a value" }
- * - end = " }
+ * - string->string = 'a string'
+ * - start = 'a key" : "a string" }'
+ * - end = '" }'
  *
- * @property start : pointer to first char of the value
+ * @property start : pointer to first char of the string
  *      - '{' for an object
  *      - '[' for an array
  *      - the first char for a string
  *      - the first digit for a number
  *
- * @property end : pointer to last char of the value
+ * @property end : pointer to last char of the string
  *      - '}' for an object
  *      - ']' for an array
  *      - the last char for a string
@@ -65,6 +65,22 @@ struct KeyValuePairParsed{
     const char *end;
 };
 
+/**
+ * @example : ': {"k": "v"}, '
+ * - start = '{"k": "v"}, '
+ * - end = '}, '
+ * - object
+ *      - type = 's'
+ *      - key[0] = 'k'
+ *      - values[0].string = 'v'
+ */
+typedef struct ObjectParsed ObjectParsed;
+struct ObjectParsed{
+    Json object;
+    char* start;
+    const char *end;
+};
+
 typedef struct NextValueInString NextValueInString;
 struct NextValueInString {
     Json json;
@@ -73,7 +89,7 @@ struct NextValueInString {
 };
 
 /**
- * @brief Parses a value and returns a Json struct
+ * @brief Parses a string and returns a Json struct
  *
  * @return The parsed Json object (gives ownership)
  * @errors Returns NULL in the following cases:
@@ -98,7 +114,7 @@ KeyValuePairParsed parse_key_value_pair(const char* string);
 NextValueInString get_next_value_in_string(const char *string);
 
 /**
- * @errors no value is detected return 'x'
+ * @errors no string is detected return 'x'
  * @param string
  * @return 'a' -> array, 'o' -> object,
  * 's' -> string, 'n' -> number, '\0' -> null

@@ -64,27 +64,27 @@ static char *test_parse_null() {
 }
 
 static char *test_get_string_between_quotes() {
-    const char *str = " \"a key\" : \"then a value\"";
+    const char *str = " \"a key\" : \"then a string\"";
     StringParsed key = get_first_string_between_double_quote(str);
-    mu_assert_not_null("test_get_string_between_quotes", key.value);
-    mu_assert_strings_equals("test_get_string_between_quotes", key.value, "a key");
-    free(key.value);
+    mu_assert_not_null("test_get_string_between_quotes", key.string);
+    mu_assert_strings_equals("test_get_string_between_quotes", key.string, "a key");
+    free(key.string);
     StringParsed key_two = get_first_string_between_double_quote("\"Paul\", \"age\":20, \"city\":\"Paris\"}");
-    mu_assert_not_null("test_get_string_between_quotes", key_two.value);
-    mu_assert_strings_equals("test_get_string_between_quotes, value", key_two.value, "Paul");
-    free(key_two.value);
+    mu_assert_not_null("test_get_string_between_quotes", key_two.string);
+    mu_assert_strings_equals("test_get_string_between_quotes, string", key_two.string, "Paul");
+    free(key_two.string);
 
-    mu_assert_null("test_get_string_between_quotes, empty key", get_first_string_between_double_quote("\"\"").value);
+    mu_assert_null("test_get_string_between_quotes, empty key", get_first_string_between_double_quote("\"\"").string);
     mu_assert_null("test_get_string_between_quotes, just one quote",
-                   get_first_string_between_double_quote("juste\"one quote").value);
-    mu_assert_null("test_get_string_between_quotes, no quote", get_first_string_between_double_quote("no key").value);
+                   get_first_string_between_double_quote("juste\"one quote").string);
+    mu_assert_null("test_get_string_between_quotes, no quote", get_first_string_between_double_quote("no key").string);
 
     return EXIT_SUCCESS;
 }
 
 static char *test_get_first_key() {
 
-    Json *json_obj = parse_json("{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");
+    Json *json_obj = parse_json("{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\" }");
 
     mu_assert_not_null("test_get_first_key, not null", json_obj);
     mu_assert_strings_equals("test_get_first_key", json_obj->keys[0], "name");
@@ -97,7 +97,7 @@ static char *test_parse_key_value() {
     KeyValuePairParsed parsed = parse_key_value_pair("{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");
     mu_assert_strings_equals("test_parse_key_value, key", "name", parsed.key);
     mu_assert("test_parse_key_value, type", parsed.value.type == 's');
-    mu_assert_strings_equals("test_parse_key_value, value", parsed.value.string, "Paul");
+    mu_assert_strings_equals("test_parse_key_value, string", parsed.value.string, "Paul");
     mu_assert_strings_equals("test_parse_key_value, start", parsed.start,
                              "\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");
     mu_assert_strings_equals("test_parse_key_value, start", parsed.end, ", \"age\":20, \"city\":\"Paris\"}");
@@ -148,11 +148,11 @@ static char *test_parse_simple_json() {
     mu_assert("error, json_obj->type != 'o'", json_obj->type == 'o');
     mu_assert("error, json_obj->nb_elements != 3", json_obj->nb_elements == 3);
     mu_assert("error, key[0] != name", strcmp(json_obj->keys[0], "name") == 0);
-    mu_assert("error, value[0] != Paul", strcmp(json_obj->values[0].string, "Paul") == 0);
+    mu_assert("error, string[0] != Paul", strcmp(json_obj->values[0].string, "Paul") == 0);
     mu_assert("error, key[1] != age", strcmp(json_obj->keys[1], "age") == 0);
-    mu_assert("error, value[1] != 20", json_obj->values[1].number == 20);
+    mu_assert("error, string[1] != 20", json_obj->values[1].number == 20);
     mu_assert("error, key[2] != city", strcmp(json_obj->keys[2], "city") == 0);
-    mu_assert("error, value[2] != Paris", strcmp(json_obj->values[2].string, "Paris") == 0);
+    mu_assert("error, string[2] != Paris", strcmp(json_obj->values[2].string, "Paris") == 0);
 
     free_json(json_obj);
     return EXIT_SUCCESS;
@@ -184,15 +184,15 @@ static char *test_expect_next_value() {
 
 static char * test_push_key_value_pair_in_json() {
     Json json = empty_json_object();
-    push_key_value_pair_in_json("first key", json_string("first value"), &json);
+    push_key_value_pair_in_json("first key", json_string("first string"), &json);
     mu_assert_ints_equals("test_push_key_value_pair_in_json : first nb_elements", json.nb_elements, 1);
     mu_assert_strings_equals("test_push_key_value_pair_in_json : first key", json.keys[0], "first key");
-    mu_assert_strings_equals("test_push_key_value_pair_in_json : first value", json.values[0].string, "first value");
+    mu_assert_strings_equals("test_push_key_value_pair_in_json : first string", json.values[0].string, "first string");
 
-    push_key_value_pair_in_json("second key", json_string("second value"), &json);
+    push_key_value_pair_in_json("second key", json_string("second string"), &json);
     mu_assert_ints_equals("test_push_key_value_pair_in_json : second nb_elements", json.nb_elements, 2);
     mu_assert_strings_equals("test_push_key_value_pair_in_json : second key", json.keys[1], "second key");
-    mu_assert_strings_equals("test_push_key_value_pair_in_json : second value", json.values[1].string, "second value");
+    mu_assert_strings_equals("test_push_key_value_pair_in_json : second string", json.values[1].string, "second string");
     return EXIT_SUCCESS;
 }
 
@@ -218,29 +218,29 @@ static char *test_nested_json() {
 
     // simple fields
     mu_assert("error, key[0] != name", strcmp(json_obj->keys[0], "name") == 0);
-    mu_assert("error, value[0] != Paul", strcmp(json_obj->values[0].string, "Paul") == 0);
+    mu_assert("error, string[0] != Paul", strcmp(json_obj->values[0].string, "Paul") == 0);
     mu_assert("error, key[1] != age", strcmp(json_obj->keys[1], "age") == 0);
-    mu_assert("error, value[1] != 20", json_obj->values[1].number == 20);
+    mu_assert("error, string[1] != 20", json_obj->values[1].number == 20);
     mu_assert("error, key[2] != city", strcmp(json_obj->keys[2], "city") == 0);
-    mu_assert("error, value[2] != Paris", strcmp(json_obj->values[2].string, "Paris") == 0);
+    mu_assert("error, string[2] != Paris", strcmp(json_obj->values[2].string, "Paris") == 0);
 
     // array
     mu_assert("error, key[3] != friends", strcmp(json_obj->keys[3], "friends") == 0);
-    mu_assert("error, value[3].type != 'a'", json_obj->values[3].type == 'a');
-    mu_assert("error, value[3].nb_elements != 2", json_obj->values[3].nb_elements == 3);
-    mu_assert("error, value[3].values[0] != Anaelle", strcmp(json_obj->values[3].values[0].string, "Anaelle") == 0);
-    mu_assert("error, value[3].values[1] != Noam", strcmp(json_obj->values[3].values[1].string, "Noam") == 0);
-    mu_assert("error, value[3].values[2] != Tom", strcmp(json_obj->values[3].values[2].string, "Tom") == 0);
+    mu_assert("error, string[3].type != 'a'", json_obj->values[3].type == 'a');
+    mu_assert("error, string[3].nb_elements != 2", json_obj->values[3].nb_elements == 3);
+    mu_assert("error, string[3].values[0] != Anaelle", strcmp(json_obj->values[3].values[0].string, "Anaelle") == 0);
+    mu_assert("error, string[3].values[1] != Noam", strcmp(json_obj->values[3].values[1].string, "Noam") == 0);
+    mu_assert("error, string[3].values[2] != Tom", strcmp(json_obj->values[3].values[2].string, "Tom") == 0);
 
     // nested
     mu_assert("error, key[4] != address", strcmp(json_obj->keys[4], "address") == 0);
-    mu_assert("error, value[4].type != 'o'", json_obj->values[4].type == 'o');
-    mu_assert("error, value[4].nb_elements != 2", json_obj->values[4].nb_elements == 2);
-    mu_assert("error, value[4].keys[0] != street", strcmp(json_obj->values[4].keys[0], "street") == 0);
-    mu_assert("error, value[4].values[0] != 1 rue du Pain",
+    mu_assert("error, string[4].type != 'o'", json_obj->values[4].type == 'o');
+    mu_assert("error, string[4].nb_elements != 2", json_obj->values[4].nb_elements == 2);
+    mu_assert("error, string[4].keys[0] != street", strcmp(json_obj->values[4].keys[0], "street") == 0);
+    mu_assert("error, string[4].values[0] != 1 rue du Pain",
               strcmp(json_obj->values[4].values[0].string, "1 rue du Pain") == 0);
-    mu_assert("error, value[4].keys[1] != zipcode", strcmp(json_obj->values[4].keys[1], "zipcode") == 0);
-    mu_assert("error, value[4].values[1] != 12345", strcmp(json_obj->values[4].values[1].string, "12345") == 0);
+    mu_assert("error, string[4].keys[1] != zipcode", strcmp(json_obj->values[4].keys[1], "zipcode") == 0);
+    mu_assert("error, string[4].values[1] != 12345", strcmp(json_obj->values[4].values[1].string, "12345") == 0);
 
     free_json(json_obj);
     return EXIT_SUCCESS;
