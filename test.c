@@ -106,15 +106,16 @@ static char *test_get_first_key() {
 }
 
 static char *test_parse_key_value() {
-    KeyValuePairParsed parsed = parse_key_value_pair("{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");
-    mu_assert_strings_equals("test_parse_key_value, key", "name", parsed.key);
-    mu_assert("test_parse_key_value, type", parsed.value.type == 's');
-    mu_assert_strings_equals("test_parse_key_value, string", parsed.value.string, "Paul");
+    Parsed parsed = parse_key_value_pair("{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");
+    mu_assert("test_parse_key_value, type", parsed.type == 'p');
+    mu_assert_strings_equals("test_parse_key_value, key", "name", parsed.key_value_pair.key);
+    mu_assert("test_parse_key_value, type", parsed.key_value_pair.value.type == 's');
+    mu_assert_strings_equals("test_parse_key_value, string", parsed.key_value_pair.value.string, "Paul");
     mu_assert_strings_equals("test_parse_key_value, start", parsed.start,
                              "\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");
     mu_assert_strings_equals("test_parse_key_value, start", parsed.end, ", \"age\":20, \"city\":\"Paris\"}");
 
-    free(parsed.key);
+    free(parsed.key_value_pair.key);
     return EXIT_SUCCESS;
 }
 

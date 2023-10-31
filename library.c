@@ -35,17 +35,17 @@ Parsed parse_json_object(const char *string) {
     while (*start != '\0' && *start != '{') start++;
     if(*start != '{') return not_parsed;
 
-    KeyValuePairParsed key_value_pair = parse_key_value_pair(string);
-    if (key_value_pair.key == NULL) return not_parsed;
+    Parsed kvp = parse_key_value_pair(string);
+    if (kvp.type != 'p' || kvp.key_value_pair.key == NULL) return not_parsed;
 
-    push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, &node);
-    while (expect_next_value(key_value_pair.end)) {
-        key_value_pair = parse_key_value_pair(key_value_pair.end);
-        if(key_value_pair.key == NULL) break;
-        push_key_value_pair_in_json(key_value_pair.key, key_value_pair.value, &node);
+    push_key_value_pair_in_json(kvp.key_value_pair.key, kvp.key_value_pair.value, &node);
+    while (expect_next_value(kvp.end)) {
+        kvp = parse_key_value_pair(kvp.end);
+        if(kvp.key_value_pair.key == NULL) break;
+        push_key_value_pair_in_json(kvp.key_value_pair.key, kvp.key_value_pair.value, &node);
     }
 
-    char *end = (char *)key_value_pair.end;
+    char *end = (char *)kvp.end;
     while (*end != '\0' && *end != '}') end++;
     if(*end != '}') return not_parsed;
 
@@ -133,26 +133,22 @@ void clean_json(Json *json) {
     }
 }
 
-KeyValuePairParsed parse_key_value_pair(const char *string) {
-    KeyValuePairParsed parsed = {
-            .key = NULL,
-            .start = NULL,
-            .end = NULL,
-    };
+Parsed parse_key_value_pair(const char *string) {
+    Parsed parsed = {.start = NULL, .end = NULL, .type = 'x'};
     Parsed key = get_first_string_between_double_quote(string);
-    if (key.string == NULL) return parsed;
+    if (key.type != 's' || key.string == NULL) return parsed;
 
     // TODO check the ':' between key and string
 
     NextValueInString value = get_next_value_in_string(key.end + 2);
-    if (value.json.type == 'x')
-        return (KeyValuePairParsed) {.start = NULL, .key = NULL, .value = no_json(), .end = NULL};
-    parsed.key = key.string;
-    parsed.start = key.start - 1;
-    parsed.end = value.end + 1;
-    parsed.value = value.json;
+    if (value.json.type == 'x') return (Parsed) {.start = NULL, .end = NULL, .type = 'x'};
 
-    return parsed;
+    return (Parsed) {
+        .type = 'p',
+        .start = key.start - 1,
+        .end = value.end + 1,
+        .key_value_pair = (KeyValuePair) {.key = key.string, .value = value.json},
+    };
 }
 
 NextValueInString get_next_value_in_string(const char *string) {

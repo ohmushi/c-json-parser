@@ -30,44 +30,32 @@ struct Json {
     Json *values;
 };
 
+typedef struct KeyValuePair KeyValuePair;
+struct KeyValuePair{
+    char* key;
+    Json value;
+};
+
 typedef struct Parsed Parsed;
 struct Parsed {
     char *start;
     char *end;
+
+    /**
+     * a: array
+     * o: object
+     * s: string
+     * p: key_value_pair
+     * x: empty
+     */
     char type;
     union {
         char* string;
         Json object;
+        KeyValuePair key_value_pair;
     };
 };
 
-
-/**
- * @example : { "a key" : "a string" }
- * - key = 'a key'
- * - string->string = 'a string'
- * - start = 'a key" : "a string" }'
- * - end = '" }'
- *
- * @property start : pointer to first char of the string
- *      - '{' for an object
- *      - '[' for an array
- *      - the first char for a string
- *      - the first digit for a number
- *
- * @property end : pointer to last char of the string
- *      - '}' for an object
- *      - ']' for an array
- *      - the last char for a string
- *      - the last digit for a number
- */
-typedef struct KeyValuePairParsed KeyValuePairParsed;
-struct KeyValuePairParsed{
-    char* key;
-    Json value;
-    char* start;
-    const char *end;
-};
 
 typedef struct NextValueInString NextValueInString;
 struct NextValueInString {
@@ -97,7 +85,7 @@ Json json_string(char *string);
 
 Parsed get_first_string_between_double_quote(const char *string);
 
-KeyValuePairParsed parse_key_value_pair(const char* string);
+Parsed parse_key_value_pair(const char* string);
 
 NextValueInString get_next_value_in_string(const char *string);
 
