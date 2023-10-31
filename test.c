@@ -15,7 +15,13 @@ static char *test_parse_key_value();
 
 static char *test_get_type_of_next_value();
 
-static char *test_get_next_value_in_string();
+static char *test_get_next_string_value_in_string();
+
+static char *test_get_next_number_value_in_string();
+
+static char *test_get_next_object_value_in_string();
+
+static char *test_get_next_array_value_in_string();
 
 static char *test_parse_simple_json();
 
@@ -35,8 +41,12 @@ static char *all_tests() {
     mu_run_test(test_get_first_key);
     mu_run_test(test_parse_key_value);
     mu_run_test(test_get_type_of_next_value);
-    mu_run_test(test_get_next_value_in_string);
+    mu_run_test(test_get_next_string_value_in_string);
+    mu_run_test(test_get_next_number_value_in_string);
+    mu_run_test(test_get_next_object_value_in_string);
     mu_run_test(test_parse_simple_json);
+    //mu_run_test(test_get_next_array_value_in_string);
+    // TODO test_get_next array, null, bool
     mu_run_test(test_is_white_space);
     mu_run_test(test_expect_next_value);
     mu_run_test(test_push_key_value_pair_in_json);
@@ -118,27 +128,34 @@ static char *test_get_type_of_next_value() {
     return EXIT_SUCCESS;
 }
 
-static char *test_get_next_value_in_string() {
+static char *test_get_next_string_value_in_string() {
     NextValueInString string = get_next_value_in_string(":\"Paul\",");
-    mu_assert("test_get_next_value_in_string, string", string.json.type == 's');
-    mu_assert_strings_equals("test_get_next_value_in_string, string", string.json.string, "Paul");
+    mu_assert("test_get_next_string_value_in_string, string", string.json.type == 's');
+    mu_assert_strings_equals("test_get_next_string_value_in_string, string", string.json.string, "Paul");
     clean_json(&string.json);
-
-    NextValueInString number = get_next_value_in_string(": 20,");
-    mu_assert("test_get_next_value_in_string, number", number.json.type == 'n');
-    mu_assert_ints_equals("test_get_next_value_in_string, number", number.json.number, 20);
-    clean_json(&number.json);
-
-    NextValueInString obj = get_next_value_in_string(": {\"k\":\"v\"},");
-    mu_assert("test_get_next_value_in_string, obj", obj.json.type == 'o');
-    mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.keys[0], "k");
-    mu_assert_strings_equals("test_get_next_value_in_string, obj", obj.json.values[0].string, "v");
-    clean_json(&obj.json);
-
-    // TODO array, number, null
 
     return EXIT_SUCCESS;
 }
+
+static char *test_get_next_number_value_in_string() {
+    NextValueInString number = get_next_value_in_string(": 20,");
+    mu_assert("test_get_next_string_value_in_string, number", number.json.type == 'n');
+    mu_assert_ints_equals("test_get_next_string_value_in_string, number", number.json.number, 20);
+    clean_json(&number.json);
+
+    return EXIT_SUCCESS;
+}
+
+static char *test_get_next_object_value_in_string() {
+    NextValueInString obj = get_next_value_in_string(": {\"k\":\"v\"},");
+    mu_assert("test_get_next_string_value_in_string, obj", obj.json.type == 'o');
+    mu_assert_ints_equals("test_get_next_string_value_in_string, obj", obj.json.nb_elements, 1);
+    mu_assert_strings_equals("test_get_next_string_value_in_string, obj", obj.json.keys[0], "k");
+    mu_assert_strings_equals("test_get_next_string_value_in_string, obj", obj.json.values[0].string, "v");
+    clean_json(&obj.json);
+    return EXIT_SUCCESS;
+}
+
 
 static char *test_parse_simple_json() {
     const char *json_str = "{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}";
@@ -155,6 +172,19 @@ static char *test_parse_simple_json() {
     mu_assert("error, string[2] != Paris", strcmp(json_obj->values[2].string, "Paris") == 0);
 
     free_json(json_obj);
+    return EXIT_SUCCESS;
+}
+
+static char *test_get_next_array_value_in_string() {
+
+    NextValueInString array = get_next_value_in_string(": [1, \"two\"],");
+    mu_assert("test_get_next_string_value_in_string, array", array.json.type == 'a');
+    mu_assert_null("test_get_next_string_value_in_string, array keys", array.json.keys);
+    mu_assert_ints_equals("test_get_next_string_value_in_string, array", array.json.nb_elements, 2);
+    mu_assert_ints_equals("test_get_next_string_value_in_string, array", array.json.values[0].number, 1);
+    mu_assert_strings_equals("test_get_next_string_value_in_string, array", array.json.values[1].string, "two");
+    clean_json(&array.json);
+
     return EXIT_SUCCESS;
 }
 
