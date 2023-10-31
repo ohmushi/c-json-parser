@@ -3,117 +3,195 @@
 #include <stdio.h>
 #include <string.h>
 
-Json *empty_json_object();
+Json no_json();
 
-Json *json_string(char *string);
+Json empty_json_object();
 
-char get_type_of_next_value(char *string);
+Json json_string(char *string);
+
+
+NextValueInString get_next_string_value_in_string(const char *string);
+
+NextValueInString get_next_number_value_in_string(const char *string);
+
+Json json_number(long strtol);
 
 Json *parse_json(const char *json_string) {
-    if(json_string == NULL) return NULL;
+    if (json_string == NULL) return NULL;
     // TODO trim left
-    if(json_string[0] != '{') return NULL;
-    Json *json_ptr = empty_json_object();
-    json_ptr->nb_elements += 1;
-    StringParsed key = get_first_string_between_double_quote(json_string + 1);
-    if(json_ptr->keys == NULL) json_ptr->keys = malloc(sizeof(char*) * 1);
-    else json_ptr->keys = realloc(json_ptr->keys, sizeof(char*) * json_ptr->nb_elements);
-    json_ptr->keys[json_ptr->nb_elements-1] = key.value;
+    if (json_string[0] != '{') return NULL;
+    Json *json_ptr = malloc(sizeof(Json));
+    *json_ptr = empty_json_object();
+
+    KeyValuePairParsed key_value_pair = parse_key_value_pair(json_string);
+    while (key_value_pair.key != NULL) {
+        printf("\nend : [%s]", key_value_pair.end);
+        json_ptr->nb_elements += 1;
+        if (json_ptr->keys == NULL) {
+            json_ptr->keys = malloc(sizeof(char *));
+            json_ptr->values = malloc(sizeof(Json));
+        } else {
+            json_ptr->keys = realloc(json_ptr->keys, sizeof(char *) * json_ptr->nb_elements);
+            json_ptr->values = realloc(json_ptr->values, sizeof(Json) * json_ptr->nb_elements);
+        }
+
+        json_ptr->keys[json_ptr->nb_elements - 1] = key_value_pair.key;
+        json_ptr->values[json_ptr->nb_elements - 1] = key_value_pair.value;
+
+        key_value_pair = parse_key_value_pair(key_value_pair.end + 1);
+    };
+
     return json_ptr;
 }
 
-Json *empty_json_object() {
-    Json *obj = malloc(sizeof(Json));
-    *obj = (Json){
-            .type = 'o',
+Json no_json() {
+    return (Json) {
+            .type = 'x',
             .number = 0,
             .string = NULL,
             .nb_elements = 0,
             .keys = NULL,
             .values = NULL,
     };
-    return obj;
 }
 
-Json *json_string(char *string) {
-    Json *obj = malloc(sizeof(Json));
-    *obj = (Json){
-            .type = 's',
-            .number = 0,
-            .string = string,
-            .nb_elements = 0,
-            .keys = NULL,
-            .values = NULL,
-    };
-    return obj;
+Json empty_json_object() {
+    Json json = no_json();
+    json.type = 'o';
+    return json;
 }
+
+Json json_string(char *string) {
+    Json json = no_json();
+    json.type = 's';
+    json.string = string;
+    return json;
+}
+
+Json json_number(long number) {
+    Json json = no_json();
+    json.type = 'n';
+    json.number = number;
+    return json;
+}
+
 
 StringParsed get_first_string_between_double_quote(const char *string) {
-    printf("\nget_first_string_between_double_quote string: [%s]\n", string);
-    uint16_t len = strlen(string);
-    char* start = (char*)string;
-    while(start != NULL && *start != '\0' && *start != '"') {
+    char *start = (char *) string;
+    while (start != NULL && *start != '\0' && *start != '"') {
         start += 1;
     }
     start += 1;
-    char* end = start;
-    while(end != NULL && *end != '\0' && *end != '"') {
+    char *end = start;
+    while (end != NULL && *end != '\0' && *end != '"') {
         end += 1;
     }
     StringParsed parsed = {.value = NULL, .start = start, .end = end};
-    if(end <= start || *end == '\0') return parsed;
+    if (end <= start || *end == '\0') return parsed;
 
     uint16_t key_len = end - start;
-    char *key = malloc(sizeof(char) * key_len+1);
+    char *key = malloc(sizeof(char) * key_len + 1);
     strncpy(key, start, key_len);
     key[key_len] = '\0';
     parsed.value = key;
     return parsed;
 }
 
+void free_json(Json *json) {
+    clean_json(json);
+    free(json);
+}
+
 void clean_json(Json *json) {
-    if(json == NULL) return;
-    if(json->string != NULL) {
+    if (json == NULL) return;
+    if (json->string != NULL) {
         free(json->string);
         json->string = NULL;
     }
-    if(json->keys != NULL) {
-        for(uint8_t i = 0; i < json->nb_elements; i++) {
-            if(json->keys[i] != NULL) {
+    if (json->keys != NULL) {
+        for (uint8_t i = 0; i < json->nb_elements; i++) {
+            if (json->keys[i] != NULL) {
                 free(json->keys[i]);
                 json->keys[i] = NULL;
             }
-            if(json->values != NULL) {
-                clean_json(&json->values[i]);
+            if (json->values != NULL) {
+                //clean_json(&json->values[i]);
             }
         }
         free(json->keys);
         json->keys = NULL;
     }
-    free(json);
 }
 
-KeyValuePairParsed parse_key_value_pair(const char* string) {
+KeyValuePairParsed parse_key_value_pair(const char *string) {
     KeyValuePairParsed parsed = {
             .key = NULL,
-            .value = NULL,
             .start = NULL,
             .end = NULL,
     };
     StringParsed key = get_first_string_between_double_quote(string);
-    if(key.value == NULL) return parsed;
+    if (key.value == NULL) return parsed;
 
-    StringParsed value = get_first_string_between_double_quote(key.end+2);
+    NextValueInString value = get_next_value_in_string(key.end + 2);
     parsed.key = key.value;
     parsed.start = key.start - 1;
     parsed.end = value.end + 1;
-    parsed.value = json_string(value.value);
+    parsed.value = value.json;
 
     return parsed;
 }
 
-char get_type_of_next_value(char *string) {
-    // TODO
-    return 's';
+NextValueInString get_next_value_in_string(const char *string) {
+    // TODO obj, array, number, null
+    char type = get_type_of_next_value(string);
+    switch (type) {
+        case 's': return get_next_string_value_in_string(string);
+        case 'n': return get_next_number_value_in_string(string);
+        // TODO array
+        // TODO obj
+        // TODO null
+        default: return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
+    }
+}
+
+NextValueInString get_next_string_value_in_string(const char *string) {
+    StringParsed value = get_first_string_between_double_quote(string);
+    return (NextValueInString) {
+            .start = value.start,
+            .end = value.end,
+            .json = json_string(value.value),
+    };
+}
+
+NextValueInString get_next_number_value_in_string(const char *string) {
+    char *start = (char*) string;
+    while (*start != '\0' && *start != '-' && (*start < '0' || *start > '9')) {
+        start++;
+    }
+
+    NextValueInString next = {.start = NULL, .end = NULL, .json = no_json()};
+    next.json = json_number(strtol(start, &next.end, 10));
+    return next;
+}
+
+char get_type_of_next_value(const char *string) {
+    char *i = (char *) string;
+    while (*i != '\0') {
+        switch (*i) {
+            case '[':
+                return 'a';
+            case '{':
+                return 'o';
+            case '"':
+                return 's';
+            case 'n':
+                if (strncmp(i, "null", 4) == 0) return '\0';
+                break;
+            default:
+                if (*i >= '0' && *i <= '9') return 'n';
+        }
+        i++;
+    }
+    return 'x';
 }
 

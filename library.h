@@ -8,14 +8,17 @@ struct Json {
     /**
      * a: array
      * o: object
-     * s: value
+     * s: string
      * n: number
+     * b: boolean
      * \0: null
+     *
+     * x: error
      */
     char type;
 
     // if number
-    int number;
+    long number;
 
     // if value
     char *string;
@@ -56,14 +59,14 @@ struct StringParsed {
 typedef struct KeyValuePairParsed KeyValuePairParsed;
 struct KeyValuePairParsed{
     char* key;
-    Json *value;
+    Json value;
     char* start;
     const char *end;
 };
 
 typedef struct NextValueInString NextValueInString;
 struct NextValueInString {
-    char type;
+    Json json;
     char *start;
     char *end;
 };
@@ -79,12 +82,22 @@ struct NextValueInString {
  */
 Json *parse_json(const char *json_string);
 
+void free_json(Json *json);
+
 void clean_json(Json *json);
 
 StringParsed get_first_string_between_double_quote(const char *string);
 
 KeyValuePairParsed parse_key_value_pair(const char* string);
 
-//NextValueInString get_next_value_in_string(const char * string);
+NextValueInString get_next_value_in_string(const char *string);
+
+/**
+ * @errors no value is detected return 'x'
+ * @param string
+ * @return 'a' -> array, 'o' -> object,
+ * 's' -> string, 'n' -> number, '\0' -> null
+ */
+char get_type_of_next_value(const char *string);
 
 #endif //C_JSON_PARSER_LIBRARY_H
