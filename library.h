@@ -4,19 +4,20 @@
 #include "stdlib.h"
 #include "stdbool.h"
 
+typedef enum JsonTokenType JsonTokenType;
+enum JsonTokenType {
+    j_array,
+    j_object,
+    j_string,
+    j_number,
+    j_boolean,
+    j_null,
+    j_empty,
+};
+
 typedef struct Json Json;
 struct Json {
-    /**
-     * a: array
-     * o: node
-     * s: string
-     * n: number
-     * b: boolean
-     * \0: null
-     *
-     * x: empty
-     */
-    char type;
+    JsonTokenType type;
 
     // if number, 0 or 1 if boolean
     long number;
@@ -91,13 +92,7 @@ Parsed parse_key_value_pair(const char* string);
 
 NextValueInString get_next_value_in_string(const char *string);
 
-/**
- * @errors no string is detected return 'x'
- * @param string
- * @return 'a' -> array, 'o' -> node,
- * 's' -> string, 'n' -> number, '\0' -> null
- */
-char get_type_of_next_value(const char *string);
+JsonTokenType get_type_of_next_value(const char *string);
 
 bool expect_next_value(const char* string);
 
