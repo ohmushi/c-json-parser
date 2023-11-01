@@ -18,11 +18,11 @@ NextValueInString get_next_array_value_in_string(const char *string);
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
     char type = get_type_of_next_value(json_string);
-    if (type != 'o') return NULL;
+    if (type != 'o' && type != 'a') return NULL;
     Json *node = malloc(sizeof(Json));
-    Parsed obj = parse_json_object(json_string);
-    if(obj.type != 'o') return NULL;
-    *node = obj.node;
+    NextValueInString root = get_next_value_in_string(json_string);
+    if(root.json.type != 'o' && root.json.type != 'a') return NULL;
+    *node = root.json;
 
     return node;
 }

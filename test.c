@@ -41,6 +41,8 @@ static char *test_parse_object_with_nested_array();
 
 static char *test_nested_json();
 
+static char* test_parse_root_array();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -62,6 +64,7 @@ static char *all_tests() {
     mu_run_test(test_parse_array_with_nested_object);
     mu_run_test(test_parse_object_with_nested_array);
     mu_run_test(test_nested_json);
+    mu_run_test(test_parse_root_array);
     return EXIT_SUCCESS;
 }
 
@@ -354,5 +357,17 @@ static char *test_nested_json() {
     mu_assert("error, string[4].values[1] != 12345", strcmp(json_obj->values[4].values[1].string, "12345") == 0);
 
     free_json(json_obj);
+    return EXIT_SUCCESS;
+}
+
+static char* test_parse_root_array() {
+    const char *str = "[1, 2,3]";
+    Json *json = parse_json(str);
+
+    mu_assert_not_null("test_parse_root_array", json);
+    mu_assert_chars_equals("test_parse_root_array", json->type, 'a');
+    mu_assert_ints_equals("test_parse_root_array", json->nb_elements, 3);
+    free_json(json);
+
     return EXIT_SUCCESS;
 }
