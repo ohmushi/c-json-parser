@@ -35,6 +35,12 @@ Parsed parse_json_object(const char *string) {
     while (*start != '\0' && *start != '{') start++;
     if (*start != '{') return not_parsed;
 
+    // TODO factorize "next (non white) char in string is ..."
+    char *close_object = start + 1;
+    while (*close_object != '\0' && is_white_space(*close_object)) close_object++;
+    if (*close_object == '}')
+        return (Parsed) {.start = start, .node = empty_json_object(), .end = close_object, .type = j_object_p};
+
     Parsed kvp = parse_key_value_pair(string);
     // TODO empty object
     if (kvp.type == j_empty_p || kvp.key_value_pair.key == NULL) return not_parsed;
@@ -159,7 +165,7 @@ Parsed parse_key_value_pair(const char *string) {
 
     char *dot = key.end + 1;
     while (*dot != '\0' && *dot != ':') dot++;
-    if(*dot != ':') return not_parsed;
+    if (*dot != ':') return not_parsed;
 
     NextValueInString value = get_next_value_in_string(key.end + 2);
     if (value.json.type == j_empty) return (Parsed) {.start = NULL, .end = NULL, .type = j_empty_p};
@@ -303,7 +309,7 @@ bool is_white_space(const char c) {
 }
 
 void push_key_value_pair_in_object(char *key, Json value, Json *json) {
-    if(json->type != j_object) return;
+    if (json->type != j_object) return;
     json->nb_elements += 1;
     if (json->nb_elements == 1) {
         json->keys = malloc(sizeof(char *));
