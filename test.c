@@ -60,6 +60,7 @@ static char * test_parse_empty_array();
 int tests_run = 0;
 
 static char *all_tests() {
+
     mu_run_test(test_parse_null);
     mu_run_test(test_get_string_between_quotes);
     mu_run_test(test_get_first_key);
@@ -75,6 +76,7 @@ static char *all_tests() {
     mu_run_test(test_push_key_value_pair_in_json);
     mu_run_test(test_push_value_in_json);
     mu_run_test(test_parse_array);
+
     mu_run_test(test_parse_array_with_nested_object);
     mu_run_test(test_parse_object_with_nested_array);
     mu_run_test(test_nested_json);
@@ -86,6 +88,7 @@ static char *all_tests() {
     mu_run_test(test_reject_parse_key_value_if_double_dot_not_present);
     mu_run_test(test_parse_empty_object);
     mu_run_test(test_parse_empty_array);
+
     return EXIT_SUCCESS;
 }
 
@@ -161,13 +164,13 @@ static char *test_get_type_of_next_value() {
     mu_assert("test_get_type_of_next_value, node", get_type_of_next_value("  : { \"k\" : \"v\"}") == j_object);
     mu_assert("test_get_type_of_next_value, array", get_type_of_next_value("  : [1,2,3], ") == j_array);
     mu_assert("test_get_type_of_next_value, null", get_type_of_next_value(" null ") == j_null);
-    mu_assert("test_get_type_of_next_value, error", get_type_of_next_value(" abc ") == 'x');
+    mu_assert("test_get_type_of_next_value, error", get_type_of_next_value(" abc ") == j_empty);
 
     return EXIT_SUCCESS;
 }
 
 static char *test_get_next_string_value_in_string() {
-    NextValueInString string = get_next_value_in_string(":\"Paul\",");
+    NextValueInString string = get_next_value_in_string(" \"Paul\",");
     mu_assert("test_get_next_string_value_in_string, string", string.json.type == j_string);
     mu_assert_strings_equals("test_get_next_string_value_in_string, string", string.json.string, "Paul");
     clean_json(&string.json);
@@ -176,7 +179,7 @@ static char *test_get_next_string_value_in_string() {
 }
 
 static char *test_get_next_number_value_in_string() {
-    NextValueInString number = get_next_value_in_string(": 20,");
+    NextValueInString number = get_next_value_in_string(" 20,");
     mu_assert("test_get_next_string_value_in_string, number", number.json.type == j_number);
     mu_assert_ints_equals("test_get_next_string_value_in_string, number", number.json.number, 20);
     clean_json(&number.json);
@@ -185,7 +188,7 @@ static char *test_get_next_number_value_in_string() {
 }
 
 static char *test_get_next_object_value_in_string() {
-    NextValueInString obj = get_next_value_in_string(": {\"k\":\"v\"},");
+    NextValueInString obj = get_next_value_in_string(" {\"k\":\"v\"},");
     mu_assert("test_get_next_string_value_in_string, obj", obj.json.type == j_object);
     mu_assert_ints_equals("test_get_next_string_value_in_string, obj", obj.json.nb_elements, 1);
     mu_assert_strings_equals("test_get_next_string_value_in_string, obj", obj.json.keys[0], "k");
@@ -215,7 +218,7 @@ static char *test_parse_simple_json() {
 
 static char *test_get_next_array_value_in_string() {
 
-    NextValueInString array = get_next_value_in_string(": [1, \"two\"],");
+    NextValueInString array = get_next_value_in_string(" [1, \"two\"],");
     mu_assert("test_get_next_string_value_in_string, array", array.json.type == j_array);
     mu_assert_null("test_get_next_string_value_in_string, array keys", array.json.keys);
     mu_assert_ints_equals("test_get_next_string_value_in_string, array", array.json.nb_elements, 2);
@@ -396,34 +399,34 @@ static char *test_parse_root_array() {
 }
 
 static char *test_get_next_null_value_in_string() {
-    NextValueInString null = get_next_null_value_in_string(": null,");
+    NextValueInString null = get_next_null_value_in_string(" null,");
     mu_assert_chars_equals("test_get_next_null_value_in_string, type", null.json.type, j_null);
     mu_assert_chars_equals("test_get_next_null_value_in_string, start", *null.start, 'n');
     mu_assert_chars_equals("test_get_next_null_value_in_string, end", *null.end, 'l');
 
-    NextValueInString notnull = get_next_null_value_in_string(": notnull,");
+    NextValueInString notnull = get_next_null_value_in_string(" notnull,");
     mu_assert_chars_equals("test_get_next_null_value_in_string, type", notnull.json.type, j_empty);
     return EXIT_SUCCESS;
 }
 
 static char *test_get_next_value_in_string_when_null() {
-    NextValueInString null = get_next_value_in_string(": null,");
+    NextValueInString null = get_next_value_in_string(" null,");
     mu_assert_chars_equals("test_get_next_value_in_string_when_null, type", null.json.type, j_null);
     mu_assert_chars_equals("test_get_next_value_in_string_when_null, start", *null.start, 'n');
     mu_assert_chars_equals("test_get_next_value_in_string_when_null, end", *null.end, 'l');
 
-    NextValueInString notnull = get_next_value_in_string(": notnull,");
+    NextValueInString notnull = get_next_value_in_string(" notnull,");
     mu_assert_chars_equals("test_get_next_value_in_string_when_null, type", notnull.json.type, j_empty);
     return EXIT_SUCCESS;
 }
 
 static char *test_get_next_boolean_value_in_string() {
-    NextValueInString j_true = get_next_boolean_value_in_string(": true,");
+    NextValueInString j_true = get_next_boolean_value_in_string(" true,");
     mu_assert_ints_equals("test_get_next_boolean_value_in_string, true type", j_true.json.type, j_boolean);
     mu_assert_chars_equals("test_get_next_boolean_value_in_string, true start", *j_true.start, 't');
     mu_assert_chars_equals("test_get_next_boolean_value_in_string, true end", *j_true.end, 'e');
 
-    NextValueInString j_false = get_next_boolean_value_in_string(": false,");
+    NextValueInString j_false = get_next_boolean_value_in_string(" false,");
     mu_assert_ints_equals("test_get_next_boolean_value_in_string, false type", j_false.json.type, j_boolean);
     mu_assert_chars_equals("test_get_next_boolean_value_in_string, false start", *j_false.start, 'f');
     mu_assert_chars_equals("test_get_next_boolean_value_in_string, false end", *j_false.end, 'e');
@@ -435,17 +438,17 @@ static char *test_get_next_boolean_value_in_string() {
 
 
 static char *test_get_next_value_in_string_when_boolean() {
-    NextValueInString j_true = get_next_value_in_string(": true,");
+    NextValueInString j_true = get_next_value_in_string(" true,");
     mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, true type", j_true.json.type, j_boolean);
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, true start", *j_true.start, 't');
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, true end", *j_true.end, 'e');
 
-    NextValueInString j_false = get_next_value_in_string(": false,");
+    NextValueInString j_false = get_next_value_in_string(" false,");
     mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, false type", j_false.json.type, j_boolean);
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, false start", *j_false.start, 'f');
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, false end", *j_false.end, 'e');
 
-    NextValueInString notboolean = get_next_value_in_string(": notboolean,");
+    NextValueInString notboolean = get_next_value_in_string(" notboolean,");
     mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, notboolean type", notboolean.json.type, j_empty);
     return EXIT_SUCCESS;
 }
@@ -475,7 +478,7 @@ static char * test_parse_empty_object() {
 }
 
 static char * test_parse_empty_array() {
-    Json *empty = parse_json("[]");
+    Json *empty = parse_json("[ ]");
     mu_assert_not_null("test_parse_empty_array", empty);
     mu_assert_ints_equals("test_parse_empty_array, type", empty->type, j_array);
     mu_assert_ints_equals("test_parse_empty_array, nb elements", empty->nb_elements, 0);
