@@ -171,7 +171,6 @@ Parsed parse_key_value_pair(const char *string) {
 }
 
 NextValueInString get_next_value_in_string(const char *string) {
-    // TODO obj, array, number, null
     JsonTokenType type = get_type_of_next_value(string);
     switch (type) {
         case j_string:
@@ -184,7 +183,8 @@ NextValueInString get_next_value_in_string(const char *string) {
             return get_next_array_value_in_string(string);
         case j_null:
             return get_next_null_value_in_string(string);
-            // TODO boolean
+        case j_boolean:
+            return get_next_boolean_value_in_string(string);
         default:
             return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
     }
@@ -266,6 +266,10 @@ JsonTokenType get_type_of_next_value(const char *string) {
                 return j_string;
             case 'n':
                 if (strncmp(i, "null", 4) == 0) return j_null;
+                break;
+            case 't':
+            case 'f':
+                if (strncmp(i, "true", 4) == 0 || strncmp(i, "false", 5) == 0) return j_boolean;
                 break;
             default:
                 if (*i >= '0' && *i <= '9') return j_number;
