@@ -121,10 +121,10 @@ static char *test_get_string_between_quotes() {
     mu_assert_strings_equals("test_get_string_between_quotes, string", key_two.string, "Paul");
     free(key_two.string);
 
-    mu_assert_null("test_get_string_between_quotes, empty key", get_first_string_between_double_quote("\"\"").string);
-    mu_assert_null("test_get_string_between_quotes, just one quote",
-                   get_first_string_between_double_quote("juste\"one quote").string);
-    mu_assert_null("test_get_string_between_quotes, no quote", get_first_string_between_double_quote("no key").string);
+    mu_assert_ints_equals("test_get_string_between_quotes, empty key", get_first_string_between_double_quote("\"\"").type, j_empty_p);
+    mu_assert_ints_equals("test_get_string_between_quotes, just one quote",
+                   get_first_string_between_double_quote("juste\"one quote").type, j_empty_p);
+    mu_assert_ints_equals("test_get_string_between_quotes, no quote", get_first_string_between_double_quote("no key").type, j_empty_p);
 
     return EXIT_SUCCESS;
 }
