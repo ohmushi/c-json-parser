@@ -43,6 +43,10 @@ static char *test_nested_json();
 
 static char* test_parse_root_array();
 
+static char * test_get_next_null_value_in_string();
+
+static char * test_get_next_value_in_string_when_null();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -56,7 +60,6 @@ static char *all_tests() {
     mu_run_test(test_get_next_object_value_in_string);
     mu_run_test(test_parse_simple_json);
     mu_run_test(test_get_next_array_value_in_string);
-    // TODO test_get_next null, bool
     mu_run_test(test_is_white_space);
     mu_run_test(test_expect_next_value);
     mu_run_test(test_push_key_value_pair_in_json);
@@ -66,6 +69,9 @@ static char *all_tests() {
     mu_run_test(test_parse_object_with_nested_array);
     mu_run_test(test_nested_json);
     mu_run_test(test_parse_root_array);
+    mu_run_test(test_get_next_null_value_in_string);
+    mu_run_test(test_get_next_value_in_string_when_null);
+    // TODO test_get_next null, bool
     return EXIT_SUCCESS;
 }
 
@@ -369,5 +375,27 @@ static char* test_parse_root_array() {
     mu_assert_ints_equals("test_parse_root_array", json->nb_elements, 3);
     free_json(json);
 
+    return EXIT_SUCCESS;
+}
+
+static char * test_get_next_null_value_in_string() {
+    NextValueInString null = get_next_null_value_in_string(": null,");
+    mu_assert_chars_equals("test_get_next_null_value_in_string, type", null.json.type, j_null);
+    mu_assert_chars_equals("test_get_next_null_value_in_string, start", *null.start, 'n');
+    mu_assert_chars_equals("test_get_next_null_value_in_string, end", *null.end, 'l');
+
+    NextValueInString notnull = get_next_null_value_in_string(": notnull,");
+    mu_assert_chars_equals("test_get_next_null_value_in_string, type", notnull.json.type, j_empty);
+    return EXIT_SUCCESS;
+}
+
+static char * test_get_next_value_in_string_when_null() {
+    NextValueInString null = get_next_value_in_string(": null,");
+    mu_assert_chars_equals("test_get_next_value_in_string_when_null, type", null.json.type, j_null);
+    mu_assert_chars_equals("test_get_next_value_in_string_when_null, start", *null.start, 'n');
+    mu_assert_chars_equals("test_get_next_value_in_string_when_null, end", *null.end, 'l');
+
+    NextValueInString notnull = get_next_value_in_string(": notnull,");
+    mu_assert_chars_equals("test_get_next_value_in_string_when_null, type", notnull.json.type, j_empty);
     return EXIT_SUCCESS;
 }

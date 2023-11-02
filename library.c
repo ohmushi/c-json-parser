@@ -15,6 +15,8 @@ NextValueInString get_next_object_value_in_string(const char *string);
 
 NextValueInString get_next_array_value_in_string(const char *string);
 
+NextValueInString get_next_null_value_in_string(const char *string);
+
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
     JsonTokenType type = get_type_of_next_value(json_string);
@@ -87,6 +89,12 @@ Json json_number(long number) {
     Json json = no_json();
     json.type = j_number;
     json.number = number;
+    return json;
+}
+
+Json json_null() {
+    Json json = no_json();
+    json.type = j_null;
     return json;
 }
 
@@ -169,7 +177,9 @@ NextValueInString get_next_value_in_string(const char *string) {
             return get_next_object_value_in_string(string);
         case j_array:
             return get_next_array_value_in_string(string);
-            // TODO null
+        case j_null:
+            return get_next_null_value_in_string(string);
+        // TODO null, boolean
         default:
             return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
     }
@@ -215,6 +225,14 @@ NextValueInString get_next_array_value_in_string(const char *string) {
 
     Parsed array = parse_json_array(c);
     return (NextValueInString) {.start = array.start, .json = array.node, .end = array.end};
+}
+
+NextValueInString get_next_null_value_in_string(const char *string) {
+    char *c = (char *) string;
+    while (*c != '\0' && *c != 'n') c++;
+    if(*c == '\0' || strncmp(c, "null", 4) != 0) return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+
+    return (NextValueInString) {.start = c, .json = json_null(), .end = c + 3};
 }
 
 
