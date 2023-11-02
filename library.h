@@ -109,5 +109,7 @@ Parsed parse_json_array(const char *string);
 
 NextValueInString get_next_null_value_in_string(const char *string);
 
+NextValueInString get_next_boolean_value_in_string(const char *string);
+
 
 #endif //C_JSON_PARSER_LIBRARY_H

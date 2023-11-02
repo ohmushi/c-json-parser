@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "stdbool.h"
 
 Json no_json();
 
@@ -14,8 +15,6 @@ Json json_number(long number);
 NextValueInString get_next_object_value_in_string(const char *string);
 
 NextValueInString get_next_array_value_in_string(const char *string);
-
-NextValueInString get_next_null_value_in_string(const char *string);
 
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
@@ -98,6 +97,12 @@ Json json_null() {
     return json;
 }
 
+Json json_boolean(bool boolean) {
+    Json json = no_json();
+    json.type = j_boolean;
+    json_number(boolean);
+    return json;
+}
 
 Parsed get_first_string_between_double_quote(const char *string) {
     char *start = (char *) string;
@@ -234,6 +239,18 @@ NextValueInString get_next_null_value_in_string(const char *string) {
         return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
 
     return (NextValueInString) {.start = c, .json = json_null(), .end = c + 3};
+}
+
+NextValueInString get_next_boolean_value_in_string(const char *string) {
+    char *c = (char *) string;
+    while (*c != '\0' && *c != 't' && *c != 'f') c++;
+    if (*c == '\0') return (NextValueInString) {.start = NULL, .json = no_json(), .end = NULL};
+    if (strncmp(c, "true", 4) == 0)
+        return (NextValueInString) {.start = c, .end = c + 3, .json = json_boolean(true)};
+    else if (strncmp(c, "false", 5) == 0)
+        return (NextValueInString) {.start = c, .end = c + 4, .json = json_boolean(false)};
+
+    return (NextValueInString) {.start = NULL, .json = no_json(), .end = NULL};
 }
 
 

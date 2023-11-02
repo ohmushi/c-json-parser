@@ -47,6 +47,8 @@ static char *test_get_next_null_value_in_string();
 
 static char *test_get_next_value_in_string_when_null();
 
+static char *test_get_next_boolean_value_in_string();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -71,6 +73,7 @@ static char *all_tests() {
     mu_run_test(test_parse_root_array);
     mu_run_test(test_get_next_null_value_in_string);
     mu_run_test(test_get_next_value_in_string_when_null);
+    mu_run_test(test_get_next_boolean_value_in_string);
     // TODO test_get_next null, bool
     return EXIT_SUCCESS;
 }
@@ -400,5 +403,21 @@ static char *test_get_next_value_in_string_when_null() {
 
     NextValueInString notnull = get_next_value_in_string(": notnull,");
     mu_assert_chars_equals("test_get_next_value_in_string_when_null, type", notnull.json.type, j_empty);
+    return EXIT_SUCCESS;
+}
+
+static char *test_get_next_boolean_value_in_string() {
+    NextValueInString j_true = get_next_boolean_value_in_string(": true,");
+    mu_assert_ints_equals("test_get_next_boolean_value_in_string, true type", j_true.json.type, j_boolean);
+    mu_assert_chars_equals("test_get_next_boolean_value_in_string, true start", *j_true.start, 't');
+    mu_assert_chars_equals("test_get_next_boolean_value_in_string, true end", *j_true.end, 'e');
+
+    NextValueInString j_false = get_next_boolean_value_in_string(": false,");
+    mu_assert_ints_equals("test_get_next_boolean_value_in_string, false type", j_false.json.type, j_boolean);
+    mu_assert_chars_equals("test_get_next_boolean_value_in_string, false start", *j_false.start, 'f');
+    mu_assert_chars_equals("test_get_next_boolean_value_in_string, false end", *j_false.end, 'e');
+
+    NextValueInString notboolean = get_next_boolean_value_in_string(": notboolean,");
+    mu_assert_ints_equals("test_get_next_boolean_value_in_string, notboolean type", notboolean.json.type, j_empty);
     return EXIT_SUCCESS;
 }
