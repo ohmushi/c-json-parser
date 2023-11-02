@@ -51,6 +51,8 @@ static char *test_get_next_boolean_value_in_string();
 
 static char *test_get_next_value_in_string_when_boolean();
 
+static char *test_reject_parse_key_value_if_double_dot_not_present();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -77,7 +79,7 @@ static char *all_tests() {
     mu_run_test(test_get_next_value_in_string_when_null);
     mu_run_test(test_get_next_boolean_value_in_string);
     mu_run_test(test_get_next_value_in_string_when_boolean);
-    // TODO test_get_next null, bool
+    mu_run_test(test_reject_parse_key_value_if_double_dot_not_present);
     return EXIT_SUCCESS;
 }
 
@@ -244,12 +246,12 @@ static char *test_expect_next_value() {
 
 static char *test_push_key_value_pair_in_json() {
     Json json = empty_json_object();
-    push_key_value_pair_in_json("first key", json_string("first string"), &json);
+    push_key_value_pair_in_object("first key", json_string("first string"), &json);
     mu_assert_ints_equals("test_push_key_value_pair_in_json : first nb_elements", json.nb_elements, 1);
     mu_assert_strings_equals("test_push_key_value_pair_in_json : first key", json.keys[0], "first key");
     mu_assert_strings_equals("test_push_key_value_pair_in_json : first string", json.values[0].string, "first string");
 
-    push_key_value_pair_in_json("second key", json_string("second string"), &json);
+    push_key_value_pair_in_object("second key", json_string("second string"), &json);
     mu_assert_ints_equals("test_push_key_value_pair_in_json : second nb_elements", json.nb_elements, 2);
     mu_assert_strings_equals("test_push_key_value_pair_in_json : second key", json.keys[1], "second key");
     mu_assert_strings_equals("test_push_key_value_pair_in_json : second string", json.values[1].string,
@@ -259,19 +261,19 @@ static char *test_push_key_value_pair_in_json() {
 
 static char *test_push_value_in_json() {
     Json not_an_array = empty_json_object();
-    push_value_in_json(json_string("not an array"), &not_an_array);
+    push_value_in_array(json_string("not an array"), &not_an_array);
     mu_assert_ints_equals("test_push_value_in_json, not an array", not_an_array.nb_elements, 0);
     mu_assert_null("test_push_value_in_json : not an array keys", not_an_array.keys);
     mu_assert_null("test_push_value_in_json : not an array values", not_an_array.values);
 
     Json array = empty_json_array();
-    push_value_in_json(json_string("first string"), &array);
+    push_value_in_array(json_string("first string"), &array);
     mu_assert_ints_equals("test_push_value_in_json : first nb_elements", array.nb_elements, 1);
     mu_assert_null("test_push_value_in_json : no keys", array.keys);
     mu_assert_chars_equals("test_push_value_in_json : type", array.values[0].type, j_string);
     mu_assert_strings_equals("test_push_value_in_json : first string", array.values[0].string, "first string");
 
-    push_value_in_json(json_string("second string"), &array);
+    push_value_in_array(json_string("second string"), &array);
     mu_assert_ints_equals("test_push_value_in_json : second nb_elements", array.nb_elements, 2);
     mu_assert_null("test_push_value_in_json : no keys", array.keys);
     mu_assert_chars_equals("test_push_value_in_json : type", array.values[1].type, j_string);
@@ -439,5 +441,12 @@ static char *test_get_next_value_in_string_when_boolean() {
 
     NextValueInString notboolean = get_next_value_in_string(": notboolean,");
     mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, notboolean type", notboolean.json.type, j_empty);
+    return EXIT_SUCCESS;
+}
+
+
+static char *test_reject_parse_key_value_if_double_dot_not_present() {
+    Parsed parsed = parse_key_value_pair("{\"key\" \"value\"}");
+    mu_assert("test_reject_parse_key_value_if_double_dot_not_present, type", parsed.type == j_empty_p);
     return EXIT_SUCCESS;
 }
