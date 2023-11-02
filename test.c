@@ -55,6 +55,8 @@ static char *test_reject_parse_key_value_if_double_dot_not_present();
 
 static char * test_parse_empty_object();
 
+static char * test_parse_empty_array();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -83,6 +85,7 @@ static char *all_tests() {
     mu_run_test(test_get_next_value_in_string_when_boolean);
     mu_run_test(test_reject_parse_key_value_if_double_dot_not_present);
     mu_run_test(test_parse_empty_object);
+    mu_run_test(test_parse_empty_array);
     return EXIT_SUCCESS;
 }
 
@@ -468,5 +471,16 @@ static char * test_parse_empty_object() {
     mu_assert_ints_equals("test_parse_empty_object, not empty type", non_empty->type, j_object);
     mu_assert_ints_equals("test_parse_empty_object, not empty nb elements", non_empty->nb_elements, 1);
     free_json(non_empty);
+    return EXIT_SUCCESS;
+}
+
+static char * test_parse_empty_array() {
+    Json *empty = parse_json("[]");
+    mu_assert_not_null("test_parse_empty_array", empty);
+    mu_assert_ints_equals("test_parse_empty_array, type", empty->type, j_array);
+    mu_assert_ints_equals("test_parse_empty_array, nb elements", empty->nb_elements, 0);
+    mu_assert_null("test_parse_empty_array, keys", empty->keys);
+    mu_assert_null("test_parse_empty_array, values", empty->values);
+    free_json(empty);
     return EXIT_SUCCESS;
 }

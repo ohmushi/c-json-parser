@@ -345,6 +345,12 @@ Parsed parse_json_array(const char *string) {
     while (*start != '\0' && *start != '[') start++;
     if (*start != '[') return not_parsed;
 
+    char *close_array = start + 1;
+    while (*close_array != '\0' && is_white_space(*close_array)) close_array++;
+    if (*close_array == ']')
+        return (Parsed) {.start = start, .node = empty_json_array(), .end = close_array, .type = j_array_p};
+
+
     NextValueInString next = get_next_value_in_string(start + 1);
     if (next.json.type == j_empty) return not_parsed; // TODO empty array
     push_value_in_array(next.json, &node);
