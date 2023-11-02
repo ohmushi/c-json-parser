@@ -121,9 +121,9 @@ static char *test_get_first_key() {
 
 static char *test_parse_key_value() {
     Parsed parsed = parse_key_value_pair("{\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");
-    mu_assert("test_parse_key_value, type", parsed.type == 'p');
+    mu_assert("test_parse_key_value, type", parsed.type == j_key_value_pair_p);
     mu_assert_strings_equals("test_parse_key_value, key", "name", parsed.key_value_pair.key);
-    mu_assert("test_parse_key_value, type", parsed.key_value_pair.value.type == j_string);
+    mu_assert("test_parse_key_value, type", parsed.key_value_pair.value.type == j_string_p);
     mu_assert_strings_equals("test_parse_key_value, string", parsed.key_value_pair.value.string, "Paul");
     mu_assert_strings_equals("test_parse_key_value, start", parsed.start,
                              "\"name\":\"Paul\", \"age\":20, \"city\":\"Paris\"}");

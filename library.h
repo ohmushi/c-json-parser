@@ -37,19 +37,20 @@ struct KeyValuePair{
     Json value;
 };
 
+typedef enum JsonParsedType JsonParsedType;
+enum JsonParsedType {
+    j_array_p,
+    j_object_p,
+    j_string_p,
+    j_key_value_pair_p,
+    j_empty_p
+};
 typedef struct Parsed Parsed;
 struct Parsed {
     char *start;
     char *end;
 
-    /**
-     * a: array
-     * o: node
-     * s: string
-     * p: key_value_pair
-     * x: empty
-     */
-    char type;
+    JsonParsedType type;
     union {
         char* string;
         Json node;
