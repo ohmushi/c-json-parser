@@ -29,7 +29,7 @@ static char *test_is_white_space();
 
 static char *test_expect_next_value();
 
-static char * test_push_key_value_pair_in_json();
+static char *test_push_key_value_pair_in_json();
 
 static char *test_push_value_in_json();
 
@@ -41,11 +41,11 @@ static char *test_parse_object_with_nested_array();
 
 static char *test_nested_json();
 
-static char* test_parse_root_array();
+static char *test_parse_root_array();
 
-static char * test_get_next_null_value_in_string();
+static char *test_get_next_null_value_in_string();
 
-static char * test_get_next_value_in_string_when_null();
+static char *test_get_next_value_in_string_when_null();
 
 int tests_run = 0;
 
@@ -236,7 +236,7 @@ static char *test_expect_next_value() {
 }
 
 
-static char * test_push_key_value_pair_in_json() {
+static char *test_push_key_value_pair_in_json() {
     Json json = empty_json_object();
     push_key_value_pair_in_json("first key", json_string("first string"), &json);
     mu_assert_ints_equals("test_push_key_value_pair_in_json : first nb_elements", json.nb_elements, 1);
@@ -246,7 +246,8 @@ static char * test_push_key_value_pair_in_json() {
     push_key_value_pair_in_json("second key", json_string("second string"), &json);
     mu_assert_ints_equals("test_push_key_value_pair_in_json : second nb_elements", json.nb_elements, 2);
     mu_assert_strings_equals("test_push_key_value_pair_in_json : second key", json.keys[1], "second key");
-    mu_assert_strings_equals("test_push_key_value_pair_in_json : second string", json.values[1].string, "second string");
+    mu_assert_strings_equals("test_push_key_value_pair_in_json : second string", json.values[1].string,
+                             "second string");
     return EXIT_SUCCESS;
 }
 
@@ -293,9 +294,11 @@ static char *test_parse_array_with_nested_object() {
 
     // object
     mu_assert_chars_equals("test_parse_array_with_nested_object, object", array.node.values[1].type, j_object);
-    mu_assert_ints_equals("test_parse_array_with_nested_object, object nb_elements", array.node.values[1].nb_elements, 1);
+    mu_assert_ints_equals("test_parse_array_with_nested_object, object nb_elements", array.node.values[1].nb_elements,
+                          1);
     mu_assert_strings_equals("test_parse_array_with_nested_object, object key", array.node.values[1].keys[0], "k");
-    mu_assert_ints_equals("test_parse_array_with_nested_object, object value", array.node.values[1].values[0].number, 2);
+    mu_assert_ints_equals("test_parse_array_with_nested_object, object value", array.node.values[1].values[0].number,
+                          2);
 
     return EXIT_SUCCESS;
 }
@@ -366,7 +369,7 @@ static char *test_nested_json() {
     return EXIT_SUCCESS;
 }
 
-static char* test_parse_root_array() {
+static char *test_parse_root_array() {
     const char *str = "[1, 2,3]";
     Json *json = parse_json(str);
 
@@ -378,7 +381,7 @@ static char* test_parse_root_array() {
     return EXIT_SUCCESS;
 }
 
-static char * test_get_next_null_value_in_string() {
+static char *test_get_next_null_value_in_string() {
     NextValueInString null = get_next_null_value_in_string(": null,");
     mu_assert_chars_equals("test_get_next_null_value_in_string, type", null.json.type, j_null);
     mu_assert_chars_equals("test_get_next_null_value_in_string, start", *null.start, 'n');
@@ -389,7 +392,7 @@ static char * test_get_next_null_value_in_string() {
     return EXIT_SUCCESS;
 }
 
-static char * test_get_next_value_in_string_when_null() {
+static char *test_get_next_value_in_string_when_null() {
     NextValueInString null = get_next_value_in_string(": null,");
     mu_assert_chars_equals("test_get_next_value_in_string_when_null, type", null.json.type, j_null);
     mu_assert_chars_equals("test_get_next_value_in_string_when_null, start", *null.start, 'n');

@@ -23,7 +23,7 @@ Json *parse_json(const char *json_string) {
     if (type != j_object && type != j_array) return NULL;
     Json *node = malloc(sizeof(Json));
     NextValueInString root = get_next_value_in_string(json_string);
-    if(root.json.type != j_object && root.json.type != j_array) return NULL;
+    if (root.json.type != j_object && root.json.type != j_array) return NULL;
     *node = root.json;
 
     return node;
@@ -31,10 +31,10 @@ Json *parse_json(const char *json_string) {
 
 Parsed parse_json_object(const char *string) {
     Json node = empty_json_object();
-    Parsed not_parsed = (Parsed){.start = NULL, .node = no_json(), .end = NULL, .type = j_empty_p};
-    char *start = (char *)string;
+    Parsed not_parsed = (Parsed) {.start = NULL, .node = no_json(), .end = NULL, .type = j_empty_p};
+    char *start = (char *) string;
     while (*start != '\0' && *start != '{') start++;
-    if(*start != '{') return not_parsed;
+    if (*start != '{') return not_parsed;
 
     Parsed kvp = parse_key_value_pair(string);
     // TODO empty object
@@ -43,13 +43,13 @@ Parsed parse_json_object(const char *string) {
     push_key_value_pair_in_json(kvp.key_value_pair.key, kvp.key_value_pair.value, &node);
     while (expect_next_value(kvp.end)) {
         kvp = parse_key_value_pair(kvp.end);
-        if(kvp.key_value_pair.key == NULL) break;
+        if (kvp.key_value_pair.key == NULL) break;
         push_key_value_pair_in_json(kvp.key_value_pair.key, kvp.key_value_pair.value, &node);
     }
 
-    char *end = (char *)kvp.end;
+    char *end = (char *) kvp.end;
     while (*end != '\0' && *end != '}') end++;
-    if(*end != '}') return not_parsed;
+    if (*end != '}') return not_parsed;
 
     Parsed parsed = {.start = start, .node = node, .end = end, .type = j_object_p};
     return parsed;
@@ -158,10 +158,10 @@ Parsed parse_key_value_pair(const char *string) {
     if (value.json.type == j_empty) return (Parsed) {.start = NULL, .end = NULL, .type = j_empty_p};
 
     return (Parsed) {
-        .type = j_key_value_pair_p,
-        .start = key.start - 1,
-        .end = value.end + 1,
-        .key_value_pair = (KeyValuePair) {.key = key.string, .value = value.json},
+            .type = j_key_value_pair_p,
+            .start = key.start - 1,
+            .end = value.end + 1,
+            .key_value_pair = (KeyValuePair) {.key = key.string, .value = value.json},
     };
 }
 
@@ -179,7 +179,7 @@ NextValueInString get_next_value_in_string(const char *string) {
             return get_next_array_value_in_string(string);
         case j_null:
             return get_next_null_value_in_string(string);
-        // TODO null, boolean
+            // TODO boolean
         default:
             return (NextValueInString) {.end = NULL, .start = NULL, .json = no_json()};
     }
@@ -187,7 +187,7 @@ NextValueInString get_next_value_in_string(const char *string) {
 
 NextValueInString get_next_string_value_in_string(const char *string) {
     Parsed value = get_first_string_between_double_quote(string);
-    if(value.type != j_string_p) return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+    if (value.type != j_string_p) return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
 
     return (NextValueInString) {
             .start = value.start,
@@ -212,7 +212,7 @@ NextValueInString get_next_number_value_in_string(const char *string) {
 NextValueInString get_next_object_value_in_string(const char *string) {
     char *c = (char *) string;
     while (*c != '\0' && *c != '{') c++;
-    if(*c != '{') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+    if (*c != '{') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
 
     Parsed obj = parse_json_object(c);
     return (NextValueInString) {.start = obj.start, .json = obj.node, .end = obj.end};
@@ -221,7 +221,7 @@ NextValueInString get_next_object_value_in_string(const char *string) {
 NextValueInString get_next_array_value_in_string(const char *string) {
     char *c = (char *) string;
     while (*c != '\0' && *c != '[') c++;
-    if(*c != '[') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+    if (*c != '[') return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
 
     Parsed array = parse_json_array(c);
     return (NextValueInString) {.start = array.start, .json = array.node, .end = array.end};
@@ -230,7 +230,8 @@ NextValueInString get_next_array_value_in_string(const char *string) {
 NextValueInString get_next_null_value_in_string(const char *string) {
     char *c = (char *) string;
     while (*c != '\0' && *c != 'n') c++;
-    if(*c == '\0' || strncmp(c, "null", 4) != 0) return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
+    if (*c == '\0' || strncmp(c, "null", 4) != 0)
+        return (NextValueInString) {.start = NULL, .end = NULL, .json = no_json()};
 
     return (NextValueInString) {.start = c, .json = json_null(), .end = c + 3};
 }
@@ -293,8 +294,8 @@ void push_key_value_pair_in_json(char *key, Json value, Json *json) {
     json->values[json->nb_elements - 1] = value;
 }
 
-void push_value_in_json(Json value, Json* json) {
-    if(json->type != j_array) return;
+void push_value_in_json(Json value, Json *json) {
+    if (json->type != j_array) return;
 
     json->nb_elements += 1;
     json->keys = NULL;
@@ -307,26 +308,26 @@ void push_value_in_json(Json value, Json* json) {
     json->values[json->nb_elements - 1] = value;
 }
 
-Parsed parse_json_array(const char* string) {
+Parsed parse_json_array(const char *string) {
     Json node = empty_json_array();
     // TODO factorize not_parsed  in function
-    Parsed not_parsed = (Parsed){.start = NULL, .node = no_json(), .end = NULL, .type = j_empty_p};
-    char *start = (char *)string;
+    Parsed not_parsed = (Parsed) {.start = NULL, .node = no_json(), .end = NULL, .type = j_empty_p};
+    char *start = (char *) string;
     while (*start != '\0' && *start != '[') start++;
-    if(*start != '[') return not_parsed;
+    if (*start != '[') return not_parsed;
 
-    NextValueInString next = get_next_value_in_string(start+1);
-    if(next.json.type == j_empty) return not_parsed; // TODO empty array
+    NextValueInString next = get_next_value_in_string(start + 1);
+    if (next.json.type == j_empty) return not_parsed; // TODO empty array
     push_value_in_json(next.json, &node);
-    while (expect_next_value(next.end+1)) {
-        next = get_next_value_in_string(next.end+1);
-        if(next.json.type == j_empty) break;
+    while (expect_next_value(next.end + 1)) {
+        next = get_next_value_in_string(next.end + 1);
+        if (next.json.type == j_empty) break;
         push_value_in_json(next.json, &node);
     }
 
-    char *end = (char *)next.end;
+    char *end = (char *) next.end;
     while (*end != '\0' && *end != ']') end++;
-    if(*end != ']') return not_parsed;
+    if (*end != ']') return not_parsed;
 
     return (Parsed) {.start = start, .end = end, .type = j_array_p, .node = node};
 }

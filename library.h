@@ -32,8 +32,8 @@ struct Json {
 };
 
 typedef struct KeyValuePair KeyValuePair;
-struct KeyValuePair{
-    char* key;
+struct KeyValuePair {
+    char *key;
     Json value;
 };
 
@@ -52,7 +52,7 @@ struct Parsed {
 
     JsonParsedType type;
     union {
-        char* string;
+        char *string;
         Json node;
         KeyValuePair key_value_pair;
     };
@@ -89,23 +89,23 @@ Json json_string(char *string);
 
 Parsed get_first_string_between_double_quote(const char *string);
 
-Parsed parse_key_value_pair(const char* string);
+Parsed parse_key_value_pair(const char *string);
 
 NextValueInString get_next_value_in_string(const char *string);
 
 JsonTokenType get_type_of_next_value(const char *string);
 
-bool expect_next_value(const char* string);
+bool expect_next_value(const char *string);
 
 bool is_white_space(const char c);
 
 void push_key_value_pair_in_json(char *key, Json value, Json *json);
 
-void push_value_in_json(Json value, Json* json);
+void push_value_in_json(Json value, Json *json);
 
 Parsed parse_json_object(const char *string);
 
-Parsed parse_json_array(const char* string);
+Parsed parse_json_array(const char *string);
 
 NextValueInString get_next_null_value_in_string(const char *string);
 
