@@ -108,7 +108,7 @@ Json json_null() {
 Json json_boolean(bool boolean) {
     Json json = no_json();
     json.type = j_boolean;
-    json_number(boolean);
+    json.number = boolean;
     return json;
 }
 

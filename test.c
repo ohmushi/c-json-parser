@@ -442,11 +442,13 @@ static char *test_get_next_value_in_string_when_boolean() {
     mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, true type", j_true.json.type, j_boolean);
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, true start", *j_true.start, 't');
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, true end", *j_true.end, 'e');
+    mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, true value", j_true.json.number, 1);
 
     NextValueInString j_false = get_next_value_in_string(" false,");
     mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, false type", j_false.json.type, j_boolean);
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, false start", *j_false.start, 'f');
     mu_assert_chars_equals("test_get_next_value_in_string_when_boolean, false end", *j_false.end, 'e');
+    mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, false value", j_false.json.number, 0);
 
     NextValueInString notboolean = get_next_value_in_string(" notboolean,");
     mu_assert_ints_equals("test_get_next_value_in_string_when_boolean, notboolean type", notboolean.json.type, j_empty);
