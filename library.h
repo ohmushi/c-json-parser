@@ -19,11 +19,8 @@ typedef struct Json Json;
 struct Json {
     JsonTokenType type;
 
-    // if number, 0 or 1 if boolean
-    long number;
-
-    // if string
-    char *string;
+    long number; // if number, 0/1 if boolean
+    char *string; // if string
 
     // if array or node
     size_t nb_elements;
@@ -59,8 +56,8 @@ struct Parsed {
 };
 
 
-typedef struct NextValueInString NextValueInString;
-struct NextValueInString {
+typedef struct NextValue NextValue;
+struct NextValue {
     Json json;
     char *start;
     char *end;
@@ -91,7 +88,7 @@ Parsed get_first_string_between_double_quote(const char *string);
 
 Parsed parse_key_value_pair(const char *string);
 
-NextValueInString get_next_value_in_string(const char *string);
+NextValue get_next_value(const char *string);
 
 JsonTokenType get_type_of_next_value(const char *string);
 
@@ -107,9 +104,9 @@ Parsed parse_json_object(const char *string);
 
 Parsed parse_json_array(const char *string);
 
-NextValueInString get_next_null_value_in_string(const char *string);
+NextValue get_next_null_value(const char *string);
 
-NextValueInString get_next_boolean_value_in_string(const char *string);
+NextValue get_next_boolean_value(const char *string);
 
 
 #endif //C_JSON_PARSER_LIBRARY_H
