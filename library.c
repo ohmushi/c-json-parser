@@ -18,7 +18,9 @@ NextValue get_next_array_value(const char *string);
 
 Parsed not_parsed();
 
-char * get_next_non_white_char(char *string);
+char *get_next_non_white_char(char *string);
+
+NextValue no_next_value();
 
 Json *parse_json(const char *json_string) {
     if (json_string == NULL) return NULL;
@@ -38,7 +40,7 @@ Parsed parse_json_object(const char *string) {
     if (*start != '{') return not_parsed();
 
     char *next_non_white_char = get_next_non_white_char(start + 1);
-    if(*next_non_white_char == '}')
+    if (*next_non_white_char == '}')
         return (Parsed) {.start = start, .node = empty_json_object(), .end = next_non_white_char, .type = j_object_p};
 
     Parsed kvp = parse_key_value_pair(string);
@@ -57,7 +59,7 @@ Parsed parse_json_object(const char *string) {
     return (Parsed) {.start = start, .node = node, .end = end, .type = j_object_p};
 }
 
-char * get_next_non_white_char(char *string) {
+char *get_next_non_white_char(char *string) {
     while (*string != '\0' && is_white_space(*string)) string++;
     return string;
 }
@@ -191,13 +193,15 @@ NextValue get_next_value(const char *string) {
         case j_boolean:
             return get_next_boolean_value(string);
         default:
-            return (NextValue) {.end = NULL, .start = NULL, .json = no_json()};
+            return no_next_value();
     }
 }
 
+NextValue no_next_value() { return (NextValue) {.end = NULL, .start = NULL, .json = no_json()}; }
+
 NextValue get_next_string_value(const char *string) {
     Parsed value = get_first_string_between_double_quote(string);
-    if (value.type != j_string_p) return (NextValue) {.start = NULL, .end = NULL, .json = no_json()};
+    if (value.type != j_string_p) return no_next_value();
 
     return (NextValue) {
             .start = value.start,
@@ -212,13 +216,13 @@ NextValue get_next_number_value(const char *string) {
     char *end;
     Json value = json_number(strtol(start, &end, 10));
 
-    if (end == NULL || end <= start) return (NextValue) {.start = NULL, .end = NULL, .json = no_json()};
+    if (end == NULL || end <= start) return no_next_value();
     return (NextValue) {.start = start, .end = end - 1, .json = value};
 }
 
 NextValue get_next_object_value(const char *string) {
     char *c = get_next_non_white_char((char *) string);
-    if (*c != '{') return (NextValue) {.start = NULL, .end = NULL, .json = no_json()};
+    if (*c != '{') return no_next_value();
 
     Parsed obj = parse_json_object(c);
     return (NextValue) {.start = obj.start, .json = obj.node, .end = obj.end};
@@ -226,7 +230,7 @@ NextValue get_next_object_value(const char *string) {
 
 NextValue get_next_array_value(const char *string) {
     char *c = get_next_non_white_char((char *) string);
-    if (*c != '[') return (NextValue) {.start = NULL, .end = NULL, .json = no_json()};
+    if (*c != '[') return no_next_value();
 
     Parsed array = parse_json_array(c);
     return (NextValue) {.start = array.start, .json = array.node, .end = array.end};
@@ -235,20 +239,20 @@ NextValue get_next_array_value(const char *string) {
 NextValue get_next_null_value(const char *string) {
     char *c = get_next_non_white_char((char *) string);
     if (*c == '\0' || strncmp(c, "null", 4) != 0)
-        return (NextValue) {.start = NULL, .end = NULL, .json = no_json()};
+        return no_next_value();
 
     return (NextValue) {.start = c, .json = json_null(), .end = c + 3};
 }
 
 NextValue get_next_boolean_value(const char *string) {
     char *c = get_next_non_white_char((char *) string);
-    if (*c != 't' && *c != 'f') return (NextValue) {.start = NULL, .json = no_json(), .end = NULL};
+    if (*c != 't' && *c != 'f') return no_next_value();
     if (strncmp(c, "true", 4) == 0)
         return (NextValue) {.start = c, .end = c + 3, .json = json_boolean(true)};
     else if (strncmp(c, "false", 5) == 0)
         return (NextValue) {.start = c, .end = c + 4, .json = json_boolean(false)};
+    else return no_next_value();
 
-    return (NextValue) {.start = NULL, .json = no_json(), .end = NULL};
 }
 
 
@@ -337,7 +341,7 @@ Parsed parse_json_array(const char *string) {
     if (next.json.type == j_empty) return not_parsed();
     push_value_in_array(next.json, &node);
     while (expect_next_value(next.end + 1)) {
-        char* comma = get_next_non_white_char(next.end + 1);
+        char *comma = get_next_non_white_char(next.end + 1);
         next = get_next_value(comma + 1);
         if (next.json.type == j_empty) return not_parsed();
         push_value_in_array(next.json, &node);
