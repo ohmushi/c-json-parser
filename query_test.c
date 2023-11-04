@@ -21,6 +21,8 @@ static char *test_query_array();
 
 static char *test_nested_object();
 
+static char *test_tested_object_in_array();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -33,6 +35,7 @@ static char *all_tests() {
     mu_run_test(test_query_not_found);
     mu_run_test(test_query_array);
     mu_run_test(test_nested_object);
+    mu_run_test(test_tested_object_in_array);
 
     return EXIT_SUCCESS;
 }
@@ -219,5 +222,15 @@ static char *test_nested_object() {
     mu_assert_true("test_nested_object should be a string", q.value.type == j_string);
     mu_assert_strings_equals("test_nested_object should be 12345", q.value.string, "12345");
     clean_json(p);
+    return EXIT_SUCCESS;
+}
+
+static char *test_tested_object_in_array() {
+    Json a = array();
+    Query q = query(a, "/2/number");
+    mu_assert_true("test_tested_object_in_array should be right", q.tag == q_Right);
+    mu_assert_true("test_tested_object_in_array should be a number", q.value.type == j_number);
+    mu_assert_true("test_tested_object_in_array should be 3", q.value.number == 3);
+    clean_json(a);
     return EXIT_SUCCESS;
 }
