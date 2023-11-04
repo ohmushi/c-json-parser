@@ -3,10 +3,9 @@ project(c_json_parser C)
 
 set(CMAKE_C_STANDARD 23)
 
-add_library(c_json_parser library.c)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror")
 
-add_executable(run run.c)
-target_link_libraries(run c_json_parser)
+add_library(c_json_parser library.c)
 
 add_executable(TESTS test.c)
 target_link_libraries(TESTS c_json_parser)

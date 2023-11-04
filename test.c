@@ -93,6 +93,7 @@ static char *all_tests() {
 }
 
 int main(int argc, char **argv) {
+    (void) argc; (void) argv;
     char *result = all_tests();
     if (result != EXIT_SUCCESS) {
         printf("%s\n", result);
