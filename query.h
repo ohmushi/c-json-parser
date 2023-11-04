@@ -35,14 +35,20 @@ struct Query {
     };
 };
 
-Query query(Json json, const char *path);
+typedef struct PathKey PathKey;
+struct PathKey {
+    char *start;
+    char *end;
+};
 
-void free_query(Query *query);
+Query query(Json json, const char *path);
 
 Query query_right(Json json);
 
 Query query_left(QueryError error);
 
 QueryError query_error(QueryErrorType type, const char *message);
+
+PathKey next_key(const char *path);
 
 #endif //C_JSON_PARSER_QUERY_H

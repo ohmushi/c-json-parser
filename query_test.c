@@ -9,12 +9,21 @@ static char *test_parse_json_empty();
 
 static char *test_query_person_name();
 
+static char *test_query_person_age();
+
+static char *test_path_not_start_with_slash();
+
+static char *test_get_next_key();
+
 int tests_run = 0;
 
 static char *all_tests() {
 
     mu_run_test(test_parse_json_empty);
     mu_run_test(test_query_person_name);
+    mu_run_test(test_path_not_start_with_slash);
+    mu_run_test(test_get_next_key);
+    mu_run_test(test_query_person_age);
 
 
     return EXIT_SUCCESS;
@@ -118,7 +127,37 @@ static char *test_query_person_name() {
     Query q = query(p, "/name");
     mu_assert_true("test_query_person_name should be right", q.tag == q_Right);
     mu_assert_true("test_query_person_name should be a string", q.value.type == j_string);
-    mu_assert_true("test_query_person_name should be Paul", strcmp(q.value.string, "Paul") == 0);
+    mu_assert_strings_equals("test_query_person_name should be Paul",q.value.string, "Paul");
+    clean_json(p);
+    return EXIT_SUCCESS;
+}
+
+static char *test_path_not_start_with_slash() {
+    Json p = person();
+    Query q = query(p, "name");
+    mu_assert_true("test_path_not_start_with_slash should be an error", q.tag == q_Left);
+    mu_assert_true("test_path_not_start_with_slash should be an error", q.error.type == qe_InvalidPath);
+    clean_json(p);
+    return EXIT_SUCCESS;
+}
+
+static char *test_get_next_key() {
+    PathKey key = next_key("/name");
+    mu_assert_strings_equals("test_get_next_key should be name", key.start, "name");
+    mu_assert_strings_equals("test_get_next_key should be name", key.end, "");
+
+    PathKey key_with_end = next_key("/name/end");
+    mu_assert_strings_equals("test_get_next_key should be name", key_with_end.start, "name/end");
+    mu_assert_strings_equals("test_get_next_key should be name", key_with_end.end, "/end");
+    return EXIT_SUCCESS;
+}
+
+static char *test_query_person_age() {
+    Json p = person();
+    Query q = query(p, "/age");
+    mu_assert_true("test_query_person_age should be right", q.tag == q_Right);
+    mu_assert_true("test_query_person_age should be a number", q.value.type == j_number);
+    mu_assert_true("test_query_person_age should be 20", q.value.number == 20);
     clean_json(p);
     return EXIT_SUCCESS;
 }
