@@ -1,32 +1,10 @@
-#ifndef C_JSON_PARSER_LIBRARY_H
-#define C_JSON_PARSER_LIBRARY_H
+#ifndef C_JSON_PARSER_PARSER_H
+#define C_JSON_PARSER_PARSER_H
 
 #include "stdlib.h"
 #include "stdbool.h"
+#include "json.h"
 
-typedef enum JsonTokenType JsonTokenType;
-enum JsonTokenType {
-    j_array,
-    j_object,
-    j_string,
-    j_number,
-    j_boolean,
-    j_null,
-    j_empty,
-};
-
-typedef struct Json Json;
-struct Json {
-    JsonTokenType type;
-
-    long number; // if number, 0/1 if boolean
-    char *string; // if string
-
-    // if array or node
-    size_t nb_elements;
-    char **keys;
-    Json *values;
-};
 
 typedef struct KeyValuePair KeyValuePair;
 struct KeyValuePair {
@@ -109,4 +87,4 @@ NextValue get_next_null_value(const char *string);
 NextValue get_next_boolean_value(const char *string);
 
 
-#endif //C_JSON_PARSER_LIBRARY_H
+#endif //C_JSON_PARSER_PARSER_H
