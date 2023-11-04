@@ -15,6 +15,10 @@ static char *test_path_not_start_with_slash();
 
 static char *test_get_next_key();
 
+static char *test_query_not_found();
+
+static char *test_query_array();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -24,7 +28,8 @@ static char *all_tests() {
     mu_run_test(test_path_not_start_with_slash);
     mu_run_test(test_get_next_key);
     mu_run_test(test_query_person_age);
-
+    mu_run_test(test_query_not_found);
+    mu_run_test(test_query_array);
 
     return EXIT_SUCCESS;
 }
@@ -96,6 +101,20 @@ Json person() {
     return person;
 }
 
+/**
+ * [1,"two"];
+ */
+Json array() {
+    Json array = {
+            .type = j_array,
+            .nb_elements = 3,
+            .values = malloc(sizeof(Json) * 3),
+    };
+    array.values[0] = (Json) {.type = j_number,.number = 1};
+    array.values[1] = (Json) {.type = j_string,.string = "two"};
+    return array;
+}
+
 void clean_json(Json json) {
     if(json.nb_elements == 0) return;
     if(json.type == j_array || json.type == j_object) {
@@ -159,5 +178,24 @@ static char *test_query_person_age() {
     mu_assert_true("test_query_person_age should be a number", q.value.type == j_number);
     mu_assert_true("test_query_person_age should be 20", q.value.number == 20);
     clean_json(p);
+    return EXIT_SUCCESS;
+}
+
+static char *test_query_not_found() {
+    Json p = person();
+    Query q = query(p, "/not_found");
+    mu_assert_true("test_query_not_found should be an error", q.tag == q_Left);
+    mu_assert_true("test_query_not_found should be an error", q.error.type == qe_NotFound);
+    clean_json(p);
+    return EXIT_SUCCESS;
+}
+
+static char *test_query_array() {
+    Json a = array();
+    Query q = query(a, "/0");
+    mu_assert_true("test_query_array should be right", q.tag == q_Right);
+    mu_assert_true("test_query_array should be a number", q.value.type == j_number);
+    mu_assert_true("test_query_array should be 1", q.value.number == 1);
+    clean_json(a);
     return EXIT_SUCCESS;
 }
