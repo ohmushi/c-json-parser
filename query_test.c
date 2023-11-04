@@ -19,6 +19,8 @@ static char *test_query_not_found();
 
 static char *test_query_array();
 
+static char *test_nested_object();
+
 int tests_run = 0;
 
 static char *all_tests() {
@@ -30,6 +32,7 @@ static char *all_tests() {
     mu_run_test(test_query_person_age);
     mu_run_test(test_query_not_found);
     mu_run_test(test_query_array);
+    mu_run_test(test_nested_object);
 
     return EXIT_SUCCESS;
 }
@@ -102,7 +105,7 @@ Json person() {
 }
 
 /**
- * [1,"two"];
+ * [1,"two", {"number":3}]
  */
 Json array() {
     Json array = {
@@ -112,6 +115,15 @@ Json array() {
     };
     array.values[0] = (Json) {.type = j_number,.number = 1};
     array.values[1] = (Json) {.type = j_string,.string = "two"};
+    array.values[2] = (Json) {
+            .type = j_object,
+            .nb_elements = 1,
+            .keys = malloc(sizeof(char *)),
+            .values = malloc(sizeof(Json)),
+    };
+    array.values[2].keys[0] = "number";
+    array.values[2].values[0] = (Json) {.type = j_number,.number = 3};
+
     return array;
 }
 
@@ -197,5 +209,15 @@ static char *test_query_array() {
     mu_assert_true("test_query_array should be a number", q.value.type == j_number);
     mu_assert_true("test_query_array should be 1", q.value.number == 1);
     clean_json(a);
+    return EXIT_SUCCESS;
+}
+
+static char *test_nested_object() {
+    Json p = person();
+    Query q = query(p, "/address/zipcode");
+    mu_assert_true("test_nested_object should be right", q.tag == q_Right);
+    mu_assert_true("test_nested_object should be a string", q.value.type == j_string);
+    mu_assert_strings_equals("test_nested_object should be 12345", q.value.string, "12345");
+    clean_json(p);
     return EXIT_SUCCESS;
 }

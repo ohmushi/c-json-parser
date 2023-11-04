@@ -19,7 +19,8 @@ Query query_object(Json json, const char *path) {
     if (key_len == 0) return query_left(query_error(qe_InvalidPath, "Empty key"));
     for (size_t i = 0; i < json.nb_elements; i++) {
         if (strlen(json.keys[i]) == key_len && strncmp(json.keys[i], key.start, key_len) == 0) {
-            return query_right(json.values[i]);
+            if(*key.end == '\0') return query_right(json.values[i]);
+            else return query(json.values[i], key.end);
         }
     }
     return query_left(query_error(qe_NotFound, "Key not found"));
