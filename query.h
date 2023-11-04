@@ -12,7 +12,6 @@ typedef enum QueryErrorType QueryErrorType;
 enum QueryErrorType {
     qe_NotFound,
     qe_InvalidPath,
-    qe_InvalidJson,
 };
 
 typedef struct QueryError QueryError;

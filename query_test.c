@@ -7,10 +7,16 @@
 
 static char *test_parse_json_empty();
 
+static char *test_query_person_name();
+
 int tests_run = 0;
 
 static char *all_tests() {
+
     mu_run_test(test_parse_json_empty);
+    mu_run_test(test_query_person_name);
+
+
     return EXIT_SUCCESS;
 }
 
@@ -103,6 +109,16 @@ static char *test_parse_json_empty() {
     };
     Query q = query(empty, "/some/path");
     mu_assert_true("Query should be an error", q.tag == q_Left);
-    mu_assert_true("Query should be an error", q.error.type == qe_InvalidJson);
+    mu_assert_true("Query should be an error", q.error.type == qe_NotFound);
+    return EXIT_SUCCESS;
+}
+
+static char *test_query_person_name() {
+    Json p = person();
+    Query q = query(p, "/name");
+    mu_assert_true("test_query_person_name should be right", q.tag == q_Right);
+    mu_assert_true("test_query_person_name should be a string", q.value.type == j_string);
+    mu_assert_true("test_query_person_name should be Paul", strcmp(q.value.string, "Paul") == 0);
+    clean_json(p);
     return EXIT_SUCCESS;
 }
